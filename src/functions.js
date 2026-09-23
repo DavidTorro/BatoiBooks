@@ -1,4 +1,5 @@
-function getBookById(books, bookId) {
+export function getBookById(books, bookId) {
+  // find devuelve el primer elemento que cumpla la condición
   const book = books.find((book) => book.id === bookId)
 
   if (!book) {
@@ -8,4 +9,13 @@ function getBookById(books, bookId) {
   return book
 }
 
-export { getBookById }
+export function getBookIndexById(books, bookId) {
+  // findIndex devuelve el índice del primer elemento que cumpla la condición
+  const bookIndex = books.findIndex((book) => book.id === bookId)
+
+  if (bookIndex === -1) {
+    throw new Error('Libro no encontrado')
+  }
+
+  return bookIndex
+}
