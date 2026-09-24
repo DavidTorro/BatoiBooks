@@ -5,7 +5,8 @@ import {
   getBookIndexById, 
   bookExists, 
   booksFromUser,
-  booksFromModule
+  booksFromModule,
+  booksCheeperThan
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -73,6 +74,21 @@ describe('booksFromModule', () => {
 
   test('Devuelve un array vacío si el módulo no tiene libros', () => {
     const books = booksFromModule(data.books, '0000')
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksCheeperThan', () => {
+  test('Devuelve libros con precio inferior o igual al indicado', () => {
+    const books = booksCheeperThan(data.books, 15)
+
+    expect(books).toHaveLength(4)
+    expect(books.every((book) => book.price <= 15)).toBe(true)
+  })
+
+  test('Devuelve un array vacío si no hay libros con ese precio', () => {
+    const books = booksCheeperThan(data.books, 0)
 
     expect(books).toEqual([])
   })
