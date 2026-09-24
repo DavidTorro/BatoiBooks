@@ -26,3 +26,8 @@ export function bookExists(books, userId, moduleCode) {
     (book) => book.userId === userId && book.moduleCode === moduleCode
   )
 }
+
+export function booksFromUser(books, userId) {
+  // filter devuelve un nuevo array con los elementos que cumplen la condición
+  return books.filter((book) => book.userId === userId)
+}

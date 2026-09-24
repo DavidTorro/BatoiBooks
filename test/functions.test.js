@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vitest'
 import data from '../src/data/datos.js'
-import { getBookById, getBookIndexById, bookExists } from '../src/functions.js'
+import { 
+  getBookById, 
+  getBookIndexById, 
+  bookExists, 
+  booksFromUser
+} from '../src/functions.js'
 
 describe('getBookById', () => {
   test('Devuelve el libro cuya id coincide', () => {
@@ -39,5 +44,20 @@ describe('bookExists', () => {
     const exists = bookExists(data.books, 2, '5021')
 
     expect(exists).toBe(false)
+  })
+})
+
+describe('booksFromUser', () => {
+  test('Devuelve todos los libros de un usuario', () => {
+    const books = booksFromUser(data.books, 4)
+
+    expect(books).toHaveLength(3)
+    expect(books.every((book) => book.userId === 4)).toBe(true)
+  })
+
+  test('Devuelve un array vacío si el usuario no tiene libros', () => {
+    const books = booksFromUser(data.books, 999)
+
+    expect(books).toEqual([])
   })
 })
