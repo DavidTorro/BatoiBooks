@@ -9,7 +9,8 @@ import {
   getBookIndexById,
   averagePriceOfBooks,
   booksOfTypeNotes,
-  booksNotSold
+  booksNotSold,
+  incrementPriceOfbooks
 } from './functions.js'
 
 console.log(getBookById(data.books, 6))
@@ -22,3 +23,4 @@ console.log(booksWithStatus(data.books, 'good'))
 console.log(averagePriceOfBooks(data.books))
 console.log(booksOfTypeNotes(data.books))
 console.log(booksNotSold(data.books))
+console.log(incrementPriceOfbooks(data.books, 0.1))

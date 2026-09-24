@@ -10,7 +10,8 @@ import {
   booksWithStatus,
   averagePriceOfBooks,
   booksOfTypeNotes,
-  booksNotSold
+  booksNotSold,
+  incrementPriceOfbooks
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -152,5 +153,19 @@ describe('booksNotSold', () => {
     )
 
     expect(books).toEqual([])
+  })
+})
+
+describe('incrementPriceOfbooks', () => {
+  test('Devuelve los libros con el precio incrementado', () => {
+    const books = incrementPriceOfbooks(data.books, 0.1)
+
+    expect(books[0].price).toBe(13.2)
+  })
+
+  test('No modifica el precio de los libros originales', () => {
+    incrementPriceOfbooks(data.books, 0.1)
+
+    expect(data.books[0].price).toBe(12)
   })
 })

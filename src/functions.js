@@ -64,3 +64,11 @@ export function booksNotSold(books) {
   // filter devuelve los libros que todavía no tienen fecha de venta
   return books.filter((book) => book.soldDate === '')
 }
+
+export function incrementPriceOfbooks(books, percentage) {
+  // map crea un nuevo array y el spread copia cada libro antes de cambiar su precio
+  return books.map((book) => ({
+    ...book,
+    price: Number((book.price * (1 + percentage)).toFixed(2)), // redondea a dos decimales
+  }))
+}
