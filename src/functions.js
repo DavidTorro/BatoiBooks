@@ -31,3 +31,8 @@ export function booksFromUser(books, userId) {
   // filter devuelve un nuevo array con los elementos que cumplen la condición
   return books.filter((book) => book.userId === userId)
 }
+
+export function booksFromModule(books, moduleCode) {
+  // filter devuelve un nuevo array con los elementos que cumplen la condición
+  return books.filter((book) => book.moduleCode === moduleCode)
+}

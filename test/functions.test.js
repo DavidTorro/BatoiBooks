@@ -4,7 +4,8 @@ import {
   getBookById, 
   getBookIndexById, 
   bookExists, 
-  booksFromUser
+  booksFromUser,
+  booksFromModule
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -57,6 +58,21 @@ describe('booksFromUser', () => {
 
   test('Devuelve un array vacío si el usuario no tiene libros', () => {
     const books = booksFromUser(data.books, 999)
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksFromModule', () => {
+  test('Devuelve todos los libros de un módulo', () => {
+    const books = booksFromModule(data.books, '5021')
+
+    expect(books).toHaveLength(3)
+    expect(books.every((book) => book.moduleCode === '5021')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si el módulo no tiene libros', () => {
+    const books = booksFromModule(data.books, '0000')
 
     expect(books).toEqual([])
   })
