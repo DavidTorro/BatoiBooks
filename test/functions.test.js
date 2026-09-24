@@ -12,7 +12,8 @@ import {
   booksOfTypeNotes,
   booksNotSold,
   incrementPriceOfbooks,
-  getUserById
+  getUserById,
+  getUserIndexById
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -180,5 +181,19 @@ describe('getUserById', () => {
 
   test('Lanza un error si no existe el usuario', () => {
     expect(() => getUserById(data.users, 999)).toThrow('Usuario no encontrado')
+  })
+})
+
+describe('getUserIndexById', () => {
+  test('Devuelve la posición del usuario cuya id coincide', () => {
+    const userIndex = getUserIndexById(data.users, 4)
+
+    expect(userIndex).toBe(2)
+  })
+
+  test('Lanza un error si no existe el usuario', () => {
+    expect(() => getUserIndexById(data.users, 999)).toThrow(
+      'Usuario no encontrado'
+    )
   })
 })

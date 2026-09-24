@@ -11,7 +11,8 @@ import {
   booksOfTypeNotes,
   booksNotSold,
   incrementPriceOfbooks,
-  getUserById
+  getUserById,
+  getUserIndexById
 } from './functions.js'
 
 console.log(getBookById(data.books, 6))
@@ -26,3 +27,4 @@ console.log(booksOfTypeNotes(data.books))
 console.log(booksNotSold(data.books))
 console.log(incrementPriceOfbooks(data.books, 0.1))
 console.log(getUserById(data.users, 3))
+console.log(getUserIndexById(data.users, 4))
