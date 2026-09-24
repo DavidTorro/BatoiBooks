@@ -1,7 +1,8 @@
 {
-  "name": "batoibooks",
+  "name": "@davidtorro/batoibooks",
   "author": "David Torró",
-  "version": "0.0.0",
+  "description": "Un proyecto para procesar y filtrar datos de libros relacionados con módulos educativos y usuarios.",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
