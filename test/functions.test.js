@@ -7,7 +7,8 @@ import {
   booksFromUser,
   booksFromModule,
   booksCheeperThan,
-  booksWithStatus
+  booksWithStatus,
+  averagePriceOfBooks
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -107,5 +108,13 @@ describe('booksWithStatus', () => {
     const books = booksWithStatus(data.books, 'unknown')
 
     expect(books).toEqual([])
+  })
+})
+
+describe('averagePriceOfBooks', () => {
+  test('Devuelve el precio medio con dos decimales y el símbolo euro', () => {
+    const averagePrice = averagePriceOfBooks(data.books)
+
+    expect(averagePrice).toBe('26.17 €')
   })
 })

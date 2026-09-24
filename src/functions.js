@@ -46,3 +46,11 @@ export function booksWithStatus(books, status) {
   // filter devuelve los libros cuyo estado cumple la condición
   return books.filter((book) => book.status === status)
 }
+
+export function averagePriceOfBooks(books) {
+  // reduce suma los precios de todos los libros
+  const totalPrice = books.reduce((total, book) => total + book.price, 0)
+  const averagePrice = totalPrice / books.length
+
+  return `${averagePrice.toFixed(2)} €`
+}

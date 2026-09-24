@@ -7,6 +7,7 @@ import {
   booksWithStatus,
   getBookById,
   getBookIndexById,
+  averagePriceOfBooks
 } from './functions.js'
 
 console.log(getBookById(data.books, 6))
@@ -16,3 +17,4 @@ console.log(booksFromUser(data.books, 4))
 console.log(booksFromModule(data.books, '5021'))
 console.log(booksCheeperThan(data.books, 15))
 console.log(booksWithStatus(data.books, 'good'))
+console.log(averagePriceOfBooks(data.books))
