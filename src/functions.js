@@ -59,3 +59,8 @@ export function booksOfTypeNotes(books) {
   // filter devuelve los libros cuyo publisher es Apunts
   return books.filter((book) => book.publisher === 'Apunts')
 }
+
+export function booksNotSold(books) {
+  // filter devuelve los libros que todavía no tienen fecha de venta
+  return books.filter((book) => book.soldDate === '')
+}

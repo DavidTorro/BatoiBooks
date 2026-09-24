@@ -9,7 +9,8 @@ import {
   booksCheeperThan,
   booksWithStatus,
   averagePriceOfBooks,
-  booksOfTypeNotes
+  booksOfTypeNotes,
+  booksNotSold
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -131,6 +132,23 @@ describe('booksOfTypeNotes', () => {
   test('Devuelve un array vacío si no hay apuntes', () => {
     const books = booksOfTypeNotes(
       data.books.filter((book) => book.publisher !== 'Apunts')
+    )
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksNotSold', () => {
+  test('Devuelve todos los libros que no se han vendido', () => {
+    const books = booksNotSold(data.books)
+
+    expect(books).toHaveLength(5)
+    expect(books.every((book) => book.soldDate === '')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si todos los libros están vendidos', () => {
+    const books = booksNotSold(
+      data.books.filter((book) => book.soldDate !== '')
     )
 
     expect(books).toEqual([])
