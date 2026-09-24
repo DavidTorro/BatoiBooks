@@ -94,3 +94,14 @@ export function getUserIndexById(users, userId) {
 
   return userIndex
 }
+
+export function getUserByNickName(users, nick) {
+  // find devuelve el primer usuario que cumple la condición
+  const user = users.find((user) => user.nick === nick)
+
+  if (!user) {
+    throw new Error('Usuario no encontrado')
+  }
+
+  return user
+}

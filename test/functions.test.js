@@ -13,7 +13,8 @@ import {
   booksNotSold,
   incrementPriceOfbooks,
   getUserById,
-  getUserIndexById
+  getUserIndexById,
+  getUserByNickName
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -193,6 +194,20 @@ describe('getUserIndexById', () => {
 
   test('Lanza un error si no existe el usuario', () => {
     expect(() => getUserIndexById(data.users, 999)).toThrow(
+      'Usuario no encontrado'
+    )
+  })
+})
+
+describe('getUserByNickName', () => {
+  test('Devuelve el usuario cuyo nick coincide', () => {
+    const user = getUserByNickName(data.users, 'Marta')
+
+    expect(user.id).toBe(4)
+  })
+
+  test('Lanza un error si no existe el nick', () => {
+    expect(() => getUserByNickName(data.users, 'Unknown')).toThrow(
       'Usuario no encontrado'
     )
   })
