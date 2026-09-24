@@ -11,7 +11,8 @@ import {
   averagePriceOfBooks,
   booksOfTypeNotes,
   booksNotSold,
-  incrementPriceOfbooks
+  incrementPriceOfbooks,
+  getUserById
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -167,5 +168,17 @@ describe('incrementPriceOfbooks', () => {
     incrementPriceOfbooks(data.books, 0.1)
 
     expect(data.books[0].price).toBe(12)
+  })
+})
+
+describe('getUserById', () => {
+  test('Devuelve el usuario cuya id coincide', () => {
+    const user = getUserById(data.users, 3)
+
+    expect(user.nick).toBe('Juan')
+  })
+
+  test('Lanza un error si no existe el usuario', () => {
+    expect(() => getUserById(data.users, 999)).toThrow('Usuario no encontrado')
   })
 })

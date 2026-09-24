@@ -72,3 +72,14 @@ export function incrementPriceOfbooks(books, percentage) {
     price: Number((book.price * (1 + percentage)).toFixed(2)), // redondea a dos decimales
   }))
 }
+
+export function getUserById(users, userId) {
+  // find devuelve el primer usuario que cumple la condición
+  const user = users.find((user) => user.id === userId)
+
+  if (!user) {
+    throw new Error('Usuario no encontrado')
+  }
+
+  return user
+}
