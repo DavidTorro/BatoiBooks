@@ -4,6 +4,7 @@ import {
   booksCheeperThan,
   booksFromModule,
   booksFromUser,
+  booksWithStatus,
   getBookById,
   getBookIndexById,
 } from './functions.js'
@@ -14,3 +15,4 @@ console.log(bookExists(data.books, 4, '5025'))
 console.log(booksFromUser(data.books, 4))
 console.log(booksFromModule(data.books, '5021'))
 console.log(booksCheeperThan(data.books, 15))
+console.log(booksWithStatus(data.books, 'good'))

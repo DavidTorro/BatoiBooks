@@ -41,3 +41,8 @@ export function booksCheeperThan(books, price) {
   // filter devuelve los libros cuyo precio cumple la condición
   return books.filter((book) => book.price <= price)
 }
+
+export function booksWithStatus(books, status) {
+  // filter devuelve los libros cuyo estado cumple la condición
+  return books.filter((book) => book.status === status)
+}

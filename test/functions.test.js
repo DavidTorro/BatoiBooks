@@ -6,7 +6,8 @@ import {
   bookExists, 
   booksFromUser,
   booksFromModule,
-  booksCheeperThan
+  booksCheeperThan,
+  booksWithStatus
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -89,6 +90,21 @@ describe('booksCheeperThan', () => {
 
   test('Devuelve un array vacío si no hay libros con ese precio', () => {
     const books = booksCheeperThan(data.books, 0)
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksWithStatus', () => {
+  test('Devuelve todos los libros con el estado indicado', () => {
+    const books = booksWithStatus(data.books, 'good')
+
+    expect(books).toHaveLength(4)
+    expect(books.every((book) => book.status === 'good')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si no existe ese estado', () => {
+    const books = booksWithStatus(data.books, 'unknown')
 
     expect(books).toEqual([])
   })
