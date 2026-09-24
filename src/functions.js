@@ -54,3 +54,8 @@ export function averagePriceOfBooks(books) {
 
   return `${averagePrice.toFixed(2)} €`
 }
+
+export function booksOfTypeNotes(books) {
+  // filter devuelve los libros cuyo publisher es Apunts
+  return books.filter((book) => book.publisher === 'Apunts')
+}

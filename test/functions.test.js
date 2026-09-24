@@ -8,7 +8,8 @@ import {
   booksFromModule,
   booksCheeperThan,
   booksWithStatus,
-  averagePriceOfBooks
+  averagePriceOfBooks,
+  booksOfTypeNotes
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -116,5 +117,22 @@ describe('averagePriceOfBooks', () => {
     const averagePrice = averagePriceOfBooks(data.books)
 
     expect(averagePrice).toBe('26.17 €')
+  })
+})
+
+describe('booksOfTypeNotes', () => {
+  test('Devuelve todos los libros que son apuntes', () => {
+    const books = booksOfTypeNotes(data.books)
+
+    expect(books).toHaveLength(3)
+    expect(books.every((book) => book.publisher === 'Apunts')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si no hay apuntes', () => {
+    const books = booksOfTypeNotes(
+      data.books.filter((book) => book.publisher !== 'Apunts')
+    )
+
+    expect(books).toEqual([])
   })
 })
