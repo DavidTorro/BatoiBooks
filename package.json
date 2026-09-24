@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:functions": "vitest test/functions.test.js"
+    "test:functions": "vitest test/functions.test.js",
+    "test:contrato": "vitest test/contrato.test.js"
   },
   "devDependencies": {
     "vite": "^8.3.0",
