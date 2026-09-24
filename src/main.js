@@ -1,34 +1,30 @@
 import data from './data/datos.js'
 import {
-  bookExists,
-  booksCheeperThan,
   booksFromModule,
   booksFromUser,
   booksWithStatus,
-  getBookById,
-  getBookIndexById,
-  averagePriceOfBooks,
-  booksOfTypeNotes,
-  booksNotSold,
   incrementPriceOfbooks,
-  getUserById,
-  getUserIndexById,
-  getUserByNickName,
-  getModuleByCode
 } from './functions.js'
 
-console.log(getBookById(data.books, 6))
-console.log(getBookIndexById(data.books, 6))
-console.log(bookExists(data.books, 4, '5025'))
-console.log(booksFromUser(data.books, 4))
-console.log(booksFromModule(data.books, '5021'))
-console.log(booksCheeperThan(data.books, 15))
-console.log(booksWithStatus(data.books, 'good'))
-console.log(averagePriceOfBooks(data.books))
-console.log(booksOfTypeNotes(data.books))
-console.log(booksNotSold(data.books))
-console.log(incrementPriceOfbooks(data.books, 0.1))
-console.log(getUserById(data.users, 3))
-console.log(getUserIndexById(data.users, 4))
-console.log(getUserByNickName(data.users, 'Marta'))
-console.log(getModuleByCode(data.modules, '5021'))
+const userId = 4
+const moduleCode = '5021'
+const status = 'good'
+const percentage = 0.1
+
+const userBooks = booksFromUser(data.books, userId)
+const moduleBooks = booksFromModule(data.books, moduleCode)
+const moduleBooksWithStatus = booksWithStatus(moduleBooks, status)
+const booksWithIncrementedPrice = incrementPriceOfbooks(
+  data.books,
+  percentage
+)
+
+console.log(`Libros del usuario ${userId}:`, userBooks)
+console.log(
+  `Libros del módulo ${moduleCode} en estado ${status}:`,
+  moduleBooksWithStatus
+)
+console.log(
+  `Libros con un incremento del ${percentage * 100}%:`,
+  booksWithIncrementedPrice
+)
