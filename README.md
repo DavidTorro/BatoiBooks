@@ -1,14 +1,12 @@
 ![Banner](./assets/banner.svg)
 
-# 📝 batoibooks
+# 📝 Batoibooks
 
 ![JavaScript](https://img.shields.io/badge/-JavaScript-f7df1e?style=for-the-badge&logo=javascript&logoColor=white) ![Vite](https://img.shields.io/badge/-Vite-646cff?style=for-the-badge&logo=vite&logoColor=white) ![Vitest](https://img.shields.io/badge/-Vitest-6e9f18?style=for-the-badge&logo=vitest&logoColor=white) ![Docker](https://img.shields.io/badge/-Docker-2496ed?style=for-the-badge&logo=docker&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/-GitHub%20Actions-2088ff?style=for-the-badge&logo=githubactions&logoColor=white)
 
 ![Version](https://img.shields.io/badge/version-1.0.0-4b61c9?style=for-the-badge)
 
 Batoibooks es un proyecto que procesa y filtra datos de libros relacionados con módulos educativos y usuarios. Utiliza funciones para obtener, filtrar y manipular información de libros, mostrando resultados en la consola. Incluye pruebas unitarias con Vitest y se ejecuta mediante Vite para desarrollo.
-
-> ⚡ Procesamiento eficiente de datos educativos en entorno Interfaz
 
 ## ⚙️ Tecnologías
 
@@ -26,6 +24,7 @@ Batoibooks es un proyecto que procesa y filtra datos de libros relacionados con 
 - ⚙️ Flujo de trabajo CI/CD automatizado con GitHub Actions
 
 <!-- readme-gen:architecture:start -->
+
 ## 🏗️ Arquitectura
 
 ```mermaid
@@ -57,8 +56,9 @@ flowchart LR
         data["📄 Datos de la aplicación<br/>src/data/datos.js"]
     end
 
-    app -- "ejecuta" --> logic
-    logic -- "lee" --> data
+    app -- "llama" --> logic
+    app -- "importa" --> data
+    data -- "se pasa como parámetro" --> logic
 
     classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
     class app g0;
@@ -74,12 +74,12 @@ flowchart LR
     style SG2 fill:#0b1220,stroke:#34d399,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
 ```
 
-| Componente | Tecnología | Detalle |
-| --- | --- | --- |
-| Aplicación | Vite | Punto de entrada principal en `src/main.js` |
-| Lógica | JavaScript | Funciones principales en `src/functions.js` |
-| Datos | JavaScript | Datos almacenados en `src/data/datos.js` |
-| Pruebas | Vitest | Tests automatizados del proyecto |
+| Componente | Tecnología | Detalle                                     |
+| ---------- | ---------- | ------------------------------------------- |
+| Aplicación | Vite       | Punto de entrada principal en `src/main.js` |
+| Lógica     | JavaScript | Funciones principales en `src/functions.js` |
+| Datos      | JavaScript | Datos almacenados en `src/data/datos.js`    |
+| Pruebas    | Vitest     | Tests automatizados del proyecto            |
 
 <!-- readme-gen:architecture:end -->
 
@@ -87,58 +87,87 @@ flowchart LR
 
 ```txt
 batoibooks/
-├── .github/               # GitHub metadata
-│   └── workflows/         # CI/CD workflows
-│       └── ci.yml         # CI workflow
-├── notes/                 # Project documentation
-│   ├── 1-introduccion.md  # Introduction document
-│   └── 2-arrays.md        # Arrays documentation
-├── public/                # Static assets
-│   ├── favicon.svg        # Website favicon
-│   ├── icons.svg          # SVG icons
-│   └── logoBatoi.png      # Project logo
-├── src/                   # Source code
-│   ├── data/              # Application data
-│   │   └── datos.js       # Data definitions
-│   ├── style/             # Stylesheets
-│   │   └── styles.css     # Main stylesheet
-│   ├── functions.js       # Utility functions
-│   └── main.js            # Main application file
-├── test/                  # Pruebas files
-│   ├── functions.test.js  # Functions Pruebas
-│   └── main.test.js       # Main module Pruebas
-├── .gitignore             # Git ignore rules
-├── docker-compose.yml     # Docker configuration
-├── index.html             # Main HTML file
-├── package-lock.json      # Dependency lock file
-└── package.json           # Project metadata
+├── .github/                 # Configuración de GitHub
+│   └── workflows/           # Flujos de CI/CD
+│       └── ci.yml           # Flujo de CI
+├── assets/                  # Recursos del proyecto
+│   └── banner.svg           # Banner del proyecto
+├── notes/                   # Enunciado del proyecto
+│   ├── 1-introduccion.md
+│   └── 2-arrays.md
+├── public/                  # Recursos públicos
+│   ├── favicon.svg
+│   ├── icons.svg
+│   └── logoBatoi.png
+├── src/                     # Código fuente
+│   ├── data/                # Datos
+│   │   └── datos.js
+│   ├── style/               # Estilos
+│   │   └── styles.css
+│   ├── functions.js         # Funciones del proyecto
+│   └── main.js              # Punto de entrada principal
+├── test/                    # Pruebas
+│   ├── functions.test.js    # Pruebas de funciones
+│   ├── contrato.test.js     # Pruebas de contrato del profesor
+│   └── main.test.js         # Prueba inicial del profesor
+├── .gitignore               # Archivos ignorados por Git
+├── docker-compose.yml       # Configuración de Docker Compose
+├── index.html               # HTML principal
+├── package-lock.json        # Versiones bloqueadas de dependencias
+├── package.json             # Configuración del proyecto
+└── README.md                # Documentación del proyecto
 ```
 
 ## 📦 Instalación
 
+Necesitaremos tener Docker con Docker Compose instalado en nuestro sistema.
+
+### Clonar el repositorio
+
 ```bash
-npm install
+git clone https://github.com/DavidTorro/BatoiBooks.git
+cd BatoiBooks
+```
+
+### Arrancar el proyecto
+
+```bash
+docker compose up -d
+```
+
+Al arrancar el contenedor, se instalarán las dependencias y se ejecutará el proyecto. Puedes acceder a la aplicación en tu navegador en `http://localhost:5173`.
+
+### Parar el proyecto
+
+```bash
+docker compose down
 ```
 
 ## 🧪 Pruebas
 
 Este proyecto incluye pruebas con Vitest.
 
+### Ejecutar todos los tests
+
 ```bash
-npm run test
+docker compose exec batoibooks npm test -- --run
 ```
 
-## 🐳 Docker
+### Ejecutar un test específico para ver si estan las funciones(archivo del profesor)
 
-Este proyecto incluye configuración de Docker.
+```bash
+docker compose exec batoibooks npm run test:contrato -- --run
+```
+
+### Ejecutar un test específico de las funciones (mio propio)
+
+```bash
+docker compose exec batoibooks npm run test:functions -- --run
+```
 
 ## 👤 Autor
 
 Hecho por **David Torró**
-
-## 📄 Licencia
-
-Sin licencia especificada.
 
 ---
 
