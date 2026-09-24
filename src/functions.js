@@ -105,3 +105,14 @@ export function getUserByNickName(users, nick) {
 
   return user
 }
+
+export function getModuleByCode(modules, moduleCode) {
+  // find devuelve el primer módulo que cumple la condición
+  const module = modules.find((module) => module.code === moduleCode)
+
+  if (!module) {
+    throw new Error('Módulo no encontrado')
+  }
+
+  return module
+}

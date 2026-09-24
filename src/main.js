@@ -13,7 +13,8 @@ import {
   incrementPriceOfbooks,
   getUserById,
   getUserIndexById,
-  getUserByNickName
+  getUserByNickName,
+  getModuleByCode
 } from './functions.js'
 
 console.log(getBookById(data.books, 6))
@@ -30,3 +31,4 @@ console.log(incrementPriceOfbooks(data.books, 0.1))
 console.log(getUserById(data.users, 3))
 console.log(getUserIndexById(data.users, 4))
 console.log(getUserByNickName(data.users, 'Marta'))
+console.log(getModuleByCode(data.modules, '5021'))

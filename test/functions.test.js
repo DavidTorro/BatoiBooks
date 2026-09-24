@@ -14,7 +14,8 @@ import {
   incrementPriceOfbooks,
   getUserById,
   getUserIndexById,
-  getUserByNickName
+  getUserByNickName,
+  getModuleByCode
 } from '../src/functions.js'
 
 describe('getBookById', () => {
@@ -209,6 +210,20 @@ describe('getUserByNickName', () => {
   test('Lanza un error si no existe el nick', () => {
     expect(() => getUserByNickName(data.users, 'Unknown')).toThrow(
       'Usuario no encontrado'
+    )
+  })
+})
+
+describe('getModuleByCode', () => {
+  test('Devuelve el módulo cuyo código coincide', () => {
+    const module = getModuleByCode(data.modules, '5021')
+
+    expect(module.cliteral).toBe('Incidentes de ciberseguridad')
+  })
+
+  test('Lanza un error si no existe el módulo', () => {
+    expect(() => getModuleByCode(data.modules, '0000')).toThrow(
+      'Módulo no encontrado'
     )
   })
 })
