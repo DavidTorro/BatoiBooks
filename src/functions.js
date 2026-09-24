@@ -19,3 +19,10 @@ export function getBookIndexById(books, bookId) {
 
   return bookIndex
 }
+
+export function bookExists(books, userId, moduleCode) {
+  // some devuelve true si al menos un elemento cumple la condición
+  return books.some(
+    (book) => book.userId === userId && book.moduleCode === moduleCode
+  )
+}
