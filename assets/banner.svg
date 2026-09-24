@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" font-family="'Helvetica Neue', -apple-system, 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="hsl(39, 45%, 8%)"/><stop offset="1" stop-color="hsl(79, 40%, 13%)"/>
+    </linearGradient>
+    <filter id="blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="70"/></filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="5" stdDeviation="9" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <style>
+      .fade-1 { opacity: 0; animation: fadeIn 1.1s ease 0.1s forwards; }
+      .fade-2 { opacity: 0; animation: fadeIn 1.1s ease 0.4s forwards; }
+      .float-title { animation: floatTitle 7s ease-in-out 1.4s infinite; }
+      .dot-a { animation: breathe 5s ease-in-out infinite; }
+      .dot-b { animation: breathe 7s ease-in-out 2s infinite; }
+      .dot-c { animation: breathe 6s ease-in-out 3.5s infinite; }
+      .blob-a { animation: driftA 26s ease-in-out infinite; }
+      .blob-b { animation: driftB 32s ease-in-out infinite; }
+      .blob-c { animation: driftC 22s ease-in-out infinite; }
+      .spin-a { animation: spin 16s linear infinite; }
+      .spin-b { animation: spinRev 26s linear infinite; }
+      .wave-a { animation: waveSlide 20s linear infinite; }
+      .wave-b { animation: waveSlide 30s linear infinite reverse; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes floatTitle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+      @keyframes breathe { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.5; } }
+      @keyframes driftA { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(70px,30px) scale(1.12); } }
+      @keyframes driftB { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px,-20px) scale(0.9); } }
+      @keyframes driftC { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(40px,-35px); } }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes spinRev { to { transform: rotate(-360deg); } }
+      @keyframes waveSlide { from { transform: translateX(0); } to { transform: translateX(-640px); } }
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; opacity: 1 !important; }
+      }</style>
+  </defs>
+  <rect width="1280" height="320" fill="url(#bg)"/>
+  <g filter="url(#blur)">
+  <circle cx="472" cy="281" r="142" fill="hsl(39, 90%, 62%)" opacity="0.32" class="blob-a"/>
+  <circle cx="990" cy="233" r="218" fill="hsl(84, 85%, 64%)" opacity="0.28" class="blob-b"/>
+  <circle cx="1053" cy="204" r="151" fill="hsl(354, 80%, 60%)" opacity="0.24" class="blob-c"/>
+  </g>
+  <g><circle cx="1056" cy="154" r="1.5" fill="hsl(39, 80%, 70%)" class="dot-a"/><circle cx="766" cy="176" r="1.3" fill="hsl(39, 80%, 70%)" class="dot-b"/><circle cx="432" cy="58" r="1.3" fill="hsl(39, 80%, 70%)" class="dot-c"/><circle cx="406" cy="94" r="2.9" fill="hsl(39, 80%, 70%)" class="dot-a"/><circle cx="866" cy="135" r="2.2" fill="hsl(39, 80%, 70%)" class="dot-b"/><circle cx="684" cy="59" r="1.4" fill="hsl(39, 80%, 70%)" class="dot-c"/><circle cx="335" cy="267" r="1.3" fill="hsl(39, 80%, 70%)" class="dot-a"/><circle cx="511" cy="207" r="1.2" fill="hsl(39, 80%, 70%)" class="dot-b"/><circle cx="47" cy="66" r="1.5" fill="hsl(39, 80%, 70%)" class="dot-c"/><circle cx="834" cy="272" r="1.6" fill="hsl(39, 80%, 70%)" class="dot-a"/><circle cx="396" cy="274" r="2.7" fill="hsl(39, 80%, 70%)" class="dot-b"/><circle cx="905" cy="281" r="2.5" fill="hsl(39, 80%, 70%)" class="dot-c"/><circle cx="256" cy="50" r="1.6" fill="hsl(39, 80%, 70%)" class="dot-a"/><circle cx="397" cy="149" r="1.9" fill="hsl(39, 80%, 70%)" class="dot-b"/><circle cx="731" cy="142" r="2.6" fill="hsl(39, 80%, 70%)" class="dot-c"/><circle cx="871" cy="196" r="2.7" fill="hsl(39, 80%, 70%)" class="dot-a"/><circle cx="1014" cy="46" r="1.8" fill="hsl(39, 80%, 70%)" class="dot-b"/><circle cx="247" cy="93" r="1.9" fill="hsl(39, 80%, 70%)" class="dot-c"/><circle cx="437" cy="227" r="1.3" fill="hsl(39, 80%, 70%)" class="dot-a"/><circle cx="1189" cy="231" r="2.5" fill="hsl(39, 80%, 70%)" class="dot-b"/><circle cx="932" cy="122" r="1.5" fill="hsl(39, 80%, 70%)" class="dot-c"/></g>
+  <g filter="url(#softShadow)">
+  <rect x="48" y="40" width="183" height="44" rx="22" fill="rgba(255,255,255,0.08)" stroke="hsl(39, 40%, 32%)"/>
+  </g>
+  <rect x="62" y="47" width="30" height="30" rx="9" fill="hsl(39, 90%, 62%)" fill-opacity="0.12" stroke="hsl(39, 90%, 62%)" stroke-opacity="0.35"/>
+  <text x="77" y="67" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">B<tspan fill="hsl(39, 90%, 62%)">B</tspan></text>
+  <text x="102" y="67" font-size="16" font-weight="700" fill="#ffffff">Batoibooks</text>
+  <g filter="url(#softShadow)">
+  <rect x="1083" y="40" width="149" height="44" rx="22" fill="rgba(255,255,255,0.08)" stroke="hsl(39, 40%, 32%)"/>
+  </g>
+  <text x="1157.5" y="67" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">@davidtorro</text>
+  <g filter="url(#softShadow)" class="fade-1">
+    <text x="640" y="186" text-anchor="middle" font-size="84" font-weight="800" letter-spacing="-3" fill="#ffffff" class="float-title">BATOI<tspan fill="hsl(39, 90%, 62%)">BOOKS</tspan></text>
+  </g>
+  <text x="640" y="232" text-anchor="middle" font-size="19" fill="hsl(39, 25%, 82%)" class="fade-2">Una aplicación web desarrollada con Vite que procesa y filtra datos de libros</text>
+  <text x="640" y="259" text-anchor="middle" font-size="19" fill="hsl(39, 25%, 82%)" class="fade-2">relacionados con módulos y usuarios. Incluye funciones para obtener libros por…</text>
+</svg>

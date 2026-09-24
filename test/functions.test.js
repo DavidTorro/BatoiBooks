@@ -1,0 +1,229 @@
+import { describe, expect, test } from 'vitest'
+import data from '../src/data/datos.js'
+import { 
+  getBookById, 
+  getBookIndexById, 
+  bookExists, 
+  booksFromUser,
+  booksFromModule,
+  booksCheeperThan,
+  booksWithStatus,
+  averagePriceOfBooks,
+  booksOfTypeNotes,
+  booksNotSold,
+  incrementPriceOfbooks,
+  getUserById,
+  getUserIndexById,
+  getUserByNickName,
+  getModuleByCode
+} from '../src/functions.js'
+
+describe('getBookById', () => {
+  test('Devuelve el libro cuya id coincide', () => {
+    const book = getBookById(data.books, 6)
+
+    expect(book.id).toBe(6)
+  })
+
+  test('Lanza un error si no existe el libro', () => {
+    expect(() => getBookById(data.books, 999)).toThrow('Libro no encontrado')
+  })
+})
+
+describe('getBookIndexById', () => {
+  test('Devuelve la posición del libro cuya id coincide', () => {
+    const bookIndex = getBookIndexById(data.books, 6)
+
+    expect(bookIndex).toBe(1)
+  })
+
+  test('Lanza un error si no existe el libro', () => {
+    expect(() => getBookIndexById(data.books, 999)).toThrow(
+      'Libro no encontrado'
+    )
+  })
+})
+
+describe('bookExists', () => {
+  test('Devuelve true si el usuario tiene un libro del módulo', () => {
+    const exists = bookExists(data.books, 4, '5025')
+
+    expect(exists).toBe(true)
+  })
+
+  test('Devuelve false si el usuario no tiene un libro del módulo', () => {
+    const exists = bookExists(data.books, 2, '5021')
+
+    expect(exists).toBe(false)
+  })
+})
+
+describe('booksFromUser', () => {
+  test('Devuelve todos los libros de un usuario', () => {
+    const books = booksFromUser(data.books, 4)
+
+    expect(books).toHaveLength(3)
+    expect(books.every((book) => book.userId === 4)).toBe(true)
+  })
+
+  test('Devuelve un array vacío si el usuario no tiene libros', () => {
+    const books = booksFromUser(data.books, 999)
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksFromModule', () => {
+  test('Devuelve todos los libros de un módulo', () => {
+    const books = booksFromModule(data.books, '5021')
+
+    expect(books).toHaveLength(3)
+    expect(books.every((book) => book.moduleCode === '5021')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si el módulo no tiene libros', () => {
+    const books = booksFromModule(data.books, '0000')
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksCheeperThan', () => {
+  test('Devuelve libros con precio inferior o igual al indicado', () => {
+    const books = booksCheeperThan(data.books, 15)
+
+    expect(books).toHaveLength(4)
+    expect(books.every((book) => book.price <= 15)).toBe(true)
+  })
+
+  test('Devuelve un array vacío si no hay libros con ese precio', () => {
+    const books = booksCheeperThan(data.books, 0)
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksWithStatus', () => {
+  test('Devuelve todos los libros con el estado indicado', () => {
+    const books = booksWithStatus(data.books, 'good')
+
+    expect(books).toHaveLength(4)
+    expect(books.every((book) => book.status === 'good')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si no existe ese estado', () => {
+    const books = booksWithStatus(data.books, 'unknown')
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('averagePriceOfBooks', () => {
+  test('Devuelve el precio medio con dos decimales y el símbolo euro', () => {
+    const averagePrice = averagePriceOfBooks(data.books)
+
+    expect(averagePrice).toBe('26.17 €')
+  })
+})
+
+describe('booksOfTypeNotes', () => {
+  test('Devuelve todos los libros que son apuntes', () => {
+    const books = booksOfTypeNotes(data.books)
+
+    expect(books).toHaveLength(3)
+    expect(books.every((book) => book.publisher === 'Apunts')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si no hay apuntes', () => {
+    const books = booksOfTypeNotes(
+      data.books.filter((book) => book.publisher !== 'Apunts')
+    )
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('booksNotSold', () => {
+  test('Devuelve todos los libros que no se han vendido', () => {
+    const books = booksNotSold(data.books)
+
+    expect(books).toHaveLength(5)
+    expect(books.every((book) => book.soldDate === '')).toBe(true)
+  })
+
+  test('Devuelve un array vacío si todos los libros están vendidos', () => {
+    const books = booksNotSold(
+      data.books.filter((book) => book.soldDate !== '')
+    )
+
+    expect(books).toEqual([])
+  })
+})
+
+describe('incrementPriceOfbooks', () => {
+  test('Devuelve los libros con el precio incrementado', () => {
+    const books = incrementPriceOfbooks(data.books, 0.1)
+
+    expect(books[0].price).toBe(13.2)
+  })
+
+  test('No modifica el precio de los libros originales', () => {
+    incrementPriceOfbooks(data.books, 0.1)
+
+    expect(data.books[0].price).toBe(12)
+  })
+})
+
+describe('getUserById', () => {
+  test('Devuelve el usuario cuya id coincide', () => {
+    const user = getUserById(data.users, 3)
+
+    expect(user.nick).toBe('Juan')
+  })
+
+  test('Lanza un error si no existe el usuario', () => {
+    expect(() => getUserById(data.users, 999)).toThrow('Usuario no encontrado')
+  })
+})
+
+describe('getUserIndexById', () => {
+  test('Devuelve la posición del usuario cuya id coincide', () => {
+    const userIndex = getUserIndexById(data.users, 4)
+
+    expect(userIndex).toBe(2)
+  })
+
+  test('Lanza un error si no existe el usuario', () => {
+    expect(() => getUserIndexById(data.users, 999)).toThrow(
+      'Usuario no encontrado'
+    )
+  })
+})
+
+describe('getUserByNickName', () => {
+  test('Devuelve el usuario cuyo nick coincide', () => {
+    const user = getUserByNickName(data.users, 'Marta')
+
+    expect(user.id).toBe(4)
+  })
+
+  test('Lanza un error si no existe el nick', () => {
+    expect(() => getUserByNickName(data.users, 'Unknown')).toThrow(
+      'Usuario no encontrado'
+    )
+  })
+})
+
+describe('getModuleByCode', () => {
+  test('Devuelve el módulo cuyo código coincide', () => {
+    const module = getModuleByCode(data.modules, '5021')
+
+    expect(module.cliteral).toBe('Incidentes de ciberseguridad')
+  })
+
+  test('Lanza un error si no existe el módulo', () => {
+    expect(() => getModuleByCode(data.modules, '0000')).toThrow(
+      'Módulo no encontrado'
+    )
+  })
+})
