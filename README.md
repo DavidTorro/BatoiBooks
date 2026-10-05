@@ -6,13 +6,13 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-4b61c9?style=for-the-badge)
 
-Batoibooks es un proyecto que procesa y filtra datos de libros relacionados con módulos educativos y usuarios. Utiliza funciones para obtener, filtrar y manipular información de libros, mostrando resultados en la consola. Incluye pruebas unitarias con Vitest y se ejecuta mediante Vite para desarrollo.
+Batoibooks es un proyecto que procesa y filtra datos de libros relacionados con módulos educativos y usuarios. Utiliza funciones y clases para obtener, filtrar y manipular información de libros, mostrando resultados en la consola. Incluye pruebas unitarias con Vitest y se ejecuta mediante Vite para desarrollo.
 
 ## ⚙️ Tecnologías
 
 - 🧪 **Pruebas**: Vitest
 - 🐳 **Infraestructura**: Docker, GitHub Actions
-- 🔧 **Herramientas**: Vite
+- 🔧 **Herramientas**: Vite, Node.js
 
 ## ✨ Características
 
@@ -48,7 +48,7 @@ flowchart LR
 
     subgraph SG1["⚙️ Lógica"]
         direction LR
-        logic["🔧 Funciones de procesamiento<br/>src/functions.js"]
+        logic["🔧 Funciones y clases de procesamiento<br/>src/functions.js<br/>src/model"]
     end
 
     subgraph SG2["💾 Datos"]
@@ -77,7 +77,7 @@ flowchart LR
 | Componente | Tecnología | Detalle                                     |
 | ---------- | ---------- | ------------------------------------------- |
 | Aplicación | Vite       | Punto de entrada principal en `src/main.js` |
-| Lógica     | JavaScript | Funciones principales en `src/functions.js` |
+| Lógica     | JavaScript | Funciones y clases principales en `src/functions.js` y `src/model/` |
 | Datos      | JavaScript | Datos almacenados en `src/data/datos.js`    |
 | Pruebas    | Vitest     | Tests automatizados del proyecto            |
 
@@ -94,7 +94,10 @@ batoibooks/
 │   └── banner.svg           # Banner del proyecto
 ├── notes/                   # Enunciado del proyecto
 │   ├── 1-introduccion.md
-│   └── 2-arrays.md
+│   ├── 2-arrays.md
+│   ├── 3-clases.md
+│   └── assets/
+│       └── resultado-clases.png
 ├── public/                  # Recursos públicos
 │   ├── favicon.svg
 │   ├── icons.svg
@@ -102,6 +105,13 @@ batoibooks/
 ├── src/                     # Código fuente
 │   ├── data/                # Datos
 │   │   └── datos.js
+│   ├── model/               # Clases del dominio
+│   │   ├── book.class.js
+│   │   ├── books.class.js
+│   │   ├── module.class.js
+│   │   ├── modules.class.js
+│   │   ├── user.class.js
+│   │   └── users.class.js
 │   ├── style/               # Estilos
 │   │   └── styles.css
 │   ├── functions.js         # Funciones del proyecto
@@ -109,7 +119,8 @@ batoibooks/
 ├── test/                    # Pruebas
 │   ├── functions.test.js    # Pruebas de funciones
 │   ├── contrato.test.js     # Pruebas de contrato del profesor
-│   └── main.test.js         # Prueba inicial del profesor
+│   ├── main.test.js         # Prueba inicial del profesor
+│   └── model.test.js        # Pruebas de las clases del modelo
 ├── .gitignore               # Archivos ignorados por Git
 ├── docker-compose.yml       # Configuración de Docker Compose
 ├── index.html               # HTML principal
@@ -153,16 +164,29 @@ Este proyecto incluye pruebas con Vitest.
 docker compose exec batoibooks npm test -- --run
 ```
 
-### Ejecutar un test específico para ver si estan las funciones(archivo del profesor)
+### Ejecutar las pruebas de contrato del profesor
 
 ```bash
 docker compose exec batoibooks npm run test:contrato -- --run
 ```
 
-### Ejecutar un test específico de las funciones (mio propio)
+### Ejecutar las pruebas de funciones
 
 ```bash
 docker compose exec batoibooks npm run test:functions -- --run
+```
+
+### Ejecutar las pruebas del modelo de clases
+
+```bash
+docker compose exec batoibooks npm run test:model -- --run
+```
+
+También puedes ejecutar los scripts directamente con `npm` si tienes Node.js instalado y las dependencias instaladas:
+
+```bash
+npm test -- --run
+npm run test:model -- --run
 ```
 
 ## 👤 Autor
