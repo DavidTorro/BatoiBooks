@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:functions": "vitest test/functions.test.js",
-    "test:contrato": "vitest test/contrato.test.js"
+    "test:contrato": "vitest test/contrato.test.js",
+    "test:model": "vitest test/model.test.js"
   },
   "devDependencies": {
     "vite": "^8.3.0",

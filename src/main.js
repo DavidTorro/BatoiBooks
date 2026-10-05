@@ -1,30 +1,16 @@
 import data from './data/datos.js'
-import {
-  booksFromModule,
-  booksFromUser,
-  booksWithStatus,
-  incrementPriceOfbooks,
-} from './functions.js'
+import Books from './model/books.class.js'
+import Modules from './model/modules.class.js'
+import Users from './model/users.class.js'
 
-const userId = 4
-const moduleCode = '5021'
-const status = 'good'
-const percentage = 0.1
+const modules = new Modules()
+const users = new Users()
+const books = new Books()
 
-const userBooks = booksFromUser(data.books, userId)
-const moduleBooks = booksFromModule(data.books, moduleCode)
-const moduleBooksWithStatus = booksWithStatus(moduleBooks, status)
-const booksWithIncrementedPrice = incrementPriceOfbooks(
-  data.books,
-  percentage
-)
+modules.populate(data.modules)
+users.populate(data.users)
+books.populate(data.books)
 
-console.log(`Libros del usuario ${userId}:`, userBooks)
-console.log(
-  `Libros del módulo ${moduleCode} en estado ${status}:`,
-  moduleBooksWithStatus
-)
-console.log(
-  `Libros con un incremento del ${percentage * 100}%:`,
-  booksWithIncrementedPrice
-)
+console.log(books.booksFromModule('5021'))
+console.log(books.booksWithStatus('new'))
+console.log(books.incrementPriceOfbooks(0.1))
