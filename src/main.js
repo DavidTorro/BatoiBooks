@@ -1,4 +1,3 @@
-import data from './data/datos.js'
 import Books from './model/books.class.js'
 import Modules from './model/modules.class.js'
 import Users from './model/users.class.js'
@@ -7,11 +6,7 @@ const modules = new Modules()
 const users = new Users()
 const books = new Books()
 
-modules.populate(data.modules)
-users.populate(data.users)
-books.populate(data.books)
+await Promise.all([modules.populate(), users.populate(), books.populate()])
 
 console.log(books.booksFromModule('5021'))
 console.log(books.booksWithStatus('new'))
-books.incrementPriceOfbooks(0.1)
-console.log(books.toString())
