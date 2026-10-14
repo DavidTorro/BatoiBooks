@@ -105,3 +105,123 @@ describe('Users y Modules', () => {
     expect(() => modules.getModuleByCode('0000')).toThrow('Módulo no encontrado')
   })
 })
+
+describe('Métodos de texto', () => {
+  test('los objetos convierten sus datos a texto JSON', () => {
+    const book = new Book(data.books[0])
+    const user = new User(1, 'Ana', 'ana@example.com', '1234')
+    const module = new Module('5021', 'Seguridad', 'Seguretat', '59')
+
+    expect(JSON.parse(book.toString())).toEqual(data.books[0])
+    expect(JSON.parse(user.toString())).toEqual({
+      id: 1,
+      nick: 'Ana',
+      email: 'ana@example.com',
+      password: '1234',
+    })
+    expect(JSON.parse(module.toString())).toEqual({
+      code: '5021',
+      cliteral: 'Seguridad',
+      vliteral: 'Seguretat',
+      courseId: '59',
+    })
+  })
+
+  test('las colecciones convierten sus elementos a texto', () => {
+    const books = new Books()
+    const users = new Users()
+    const modules = new Modules()
+
+    books.populate(data.books)
+    users.populate(data.users)
+    modules.populate(data.modules)
+
+    expect(books.toString()).toContain('"id":1')
+    expect(users.toString()).toContain('"nick":"Ignasi"')
+    expect(modules.toString()).toContain('"code":"0011"')
+  })
+})
+
+describe('Consultas de Books', () => {
+  function createBooks() {
+    const books = new Books()
+    books.populate(data.books)
+    return books
+  }
+
+  test('busca libros por id e índice y lanza error cuando no existen', () => {
+    const books = createBooks()
+
+    expect(books.getBookById(6).id).toBe(6)
+    expect(books.getBookIndexById(6)).toBe(1)
+    expect(() => books.getBookById(999)).toThrow('Libro no encontrado')
+    expect(() => books.getBookIndexById(999)).toThrow('Libro no encontrado')
+  })
+
+  test('resuelve todas las consultas heredadas del ejercicio de arrays', () => {
+    const books = createBooks()
+
+    expect(books.bookExists(4, '5025')).toBe(true)
+    expect(books.bookExists(2, '5021')).toBe(false)
+    expect(books.booksFromUser(4)).toHaveLength(3)
+    expect(books.booksFromModule('5021')).toHaveLength(3)
+    expect(books.booksCheeperThan(15)).toHaveLength(4)
+    expect(books.booksWithStatus('good')).toHaveLength(4)
+    expect(books.averagePriceOfBooks()).toBe('26.17 €')
+    expect(books.booksOfTypeNotes()).toHaveLength(3)
+    expect(books.booksNotSold()).toHaveLength(5)
+  })
+
+  test('incrementa los precios de la misma colección sin crear otra', () => {
+    const books = createBooks()
+    const firstBook = books.data[0]
+
+    expect(books.incrementPriceOfbooks(0.1)).toBeUndefined()
+    expect(books.data[0]).toBe(firstBook)
+    expect(books.data[0].price).toBe(13.2)
+  })
+
+  test('lanza errores al cambiar o eliminar libros inexistentes', () => {
+    const books = createBooks()
+
+    expect(() => books.changeBook({ id: 999 })).toThrow('Libro no encontrado')
+    expect(() => books.removeBook(999)).toThrow('Libro no encontrado')
+  })
+})
+
+describe('Consultas de Users y Modules', () => {
+  test('busca usuarios por id, índice y nick, incluidos los errores', () => {
+    const users = new Users()
+    users.populate(data.users)
+
+    expect(users.getUserById(3).nick).toBe('Juan')
+    expect(users.getUserIndexById(4)).toBe(2)
+    expect(users.getUserByNickName('Marta').id).toBe(4)
+    expect(() => users.getUserById(999)).toThrow('Usuario no encontrado')
+    expect(() => users.getUserIndexById(999)).toThrow('Usuario no encontrado')
+    expect(() => users.getUserByNickName('Unknown')).toThrow(
+      'Usuario no encontrado'
+    )
+  })
+
+  test('lanza errores al cambiar o eliminar usuarios inexistentes', () => {
+    const users = new Users()
+    users.populate(data.users)
+
+    expect(() => users.changeUser({ id: 999 })).toThrow('Usuario no encontrado')
+    expect(() => users.removeUser(999)).toThrow('Usuario no encontrado')
+  })
+
+  test('populate no devuelve valores y genera instancias de las clases esperadas', () => {
+    const books = new Books()
+    const users = new Users()
+    const modules = new Modules()
+
+    expect(books.populate(data.books)).toBeUndefined()
+    expect(users.populate(data.users)).toBeUndefined()
+    expect(modules.populate(data.modules)).toBeUndefined()
+    expect(books.data[0]).toBeInstanceOf(Book)
+    expect(users.data[0]).toBeInstanceOf(User)
+    expect(modules.data[0]).toBeInstanceOf(Module)
+  })
+})
