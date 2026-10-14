@@ -6,11 +6,12 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-4b61c9?style=for-the-badge)
 
-Batoibooks es un proyecto que procesa y filtra datos de libros relacionados con módulos educativos y usuarios. Utiliza funciones y clases para obtener, filtrar y manipular información de libros, mostrando resultados en la consola. Incluye pruebas unitarias con Vitest y se ejecuta mediante Vite para desarrollo.
+Batoibooks es una aplicación para consultar libros de texto y apuntes relacionados con módulos educativos y usuarios. Carga y persiste los datos mediante una API HTTP, mostrando los resultados por consola. Incluye pruebas unitarias con Vitest y se ejecuta mediante Vite para desarrollo.
 
 ## ⚙️ Tecnologías
 
-- 🧪 **Pruebas**: Vitest
+- 🧪 **Pruebas**: Vitest, MSW
+- 💾 **Persistencia**: JSON Server
 - 🐳 **Infraestructura**: Docker, GitHub Actions
 - 🔧 **Herramientas**: Vite, Node.js
 
@@ -19,8 +20,9 @@ Batoibooks es un proyecto que procesa y filtra datos de libros relacionados con 
 - 🚀 Desarrollo rápido con Vite y servidor en vivo
 - 🧪 Pruebas unitarias automatizadas con Vitest
 - 🐳 Contenedorizado con Docker para entornos consistentes
-- 📂 Estructura clara de datos y funciones modulares
-- 🔧 Filtrado y manipulación de libros por usuario y módulo
+- 🔌 Servicios HTTP centralizados en `src/services/api.js`
+- 📚 Colecciones de libros, usuarios y módulos persistentes
+- 🔧 Filtrado y consulta de libros por usuario, módulo y estado
 - ⚙️ Flujo de trabajo CI/CD automatizado con GitHub Actions
 
 <!-- readme-gen:architecture:start -->
@@ -48,17 +50,18 @@ flowchart LR
 
     subgraph SG1["⚙️ Lógica"]
         direction LR
-        logic["🔧 Funciones y clases de procesamiento<br/>src/functions.js<br/>src/model"]
+        logic["🔧 Clases del dominio<br/>src/model"]
     end
 
-    subgraph SG2["💾 Datos"]
+    subgraph SG2["🔌 Persistencia"]
         direction LR
-        data["📄 Datos de la aplicación<br/>src/data/datos.js"]
+        data["🔌 Servicios HTTP<br/>src/services/api.js"]
+        database["💾 JSON Server<br/>batoibooks.json"]
     end
 
-    app -- "llama" --> logic
-    app -- "importa" --> data
-    data -- "se pasa como parámetro" --> logic
+    app -- "carga" --> logic
+    logic -- "consulta" --> data
+    data -- "HTTP" --> database
 
     classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
     class app g0;
@@ -77,9 +80,9 @@ flowchart LR
 | Componente | Tecnología | Detalle                                     |
 | ---------- | ---------- | ------------------------------------------- |
 | Aplicación | Vite       | Punto de entrada principal en `src/main.js` |
-| Lógica     | JavaScript | Funciones y clases principales en `src/functions.js` y `src/model/` |
-| Datos      | JavaScript | Datos almacenados en `src/data/datos.js`    |
-| Pruebas    | Vitest     | Tests automatizados del proyecto            |
+| Lógica     | JavaScript | Clases principales en `src/model/`          |
+| Datos      | JSON Server | API local servida desde `src/data/batoibooks.json` |
+| Pruebas    | Vitest + MSW | Tests automatizados y simulación de la API |
 
 <!-- readme-gen:architecture:end -->
 
@@ -96,7 +99,9 @@ batoibooks/
 │   ├── 1-introduccion.md
 │   ├── 2-arrays.md
 │   ├── 3-clases.md
+│   ├── 4-ajax.md
 │   └── assets/
+│       ├── resultado-ajax.png
 │       └── resultado-clases.png
 ├── public/                  # Recursos públicos
 │   ├── favicon.svg
@@ -104,7 +109,8 @@ batoibooks/
 │   └── logoBatoi.png
 ├── src/                     # Código fuente
 │   ├── data/                # Datos
-│   │   └── datos.js
+│   │   └── batoibooks.json
+│   │   └── datos.js          # Datos heredados de prácticas anteriores
 │   ├── model/               # Clases del dominio
 │   │   ├── book.class.js
 │   │   ├── books.class.js
@@ -112,15 +118,18 @@ batoibooks/
 │   │   ├── modules.class.js
 │   │   ├── user.class.js
 │   │   └── users.class.js
+│   ├── services/            # Comunicación con la API
+│   │   └── api.js
 │   ├── style/               # Estilos
 │   │   └── styles.css
-│   ├── functions.js         # Funciones del proyecto
+│   ├── functions.js         # Funciones heredadas de prácticas anteriores
 │   └── main.js              # Punto de entrada principal
 ├── test/                    # Pruebas
-│   ├── functions.test.js    # Pruebas de funciones
-│   ├── contrato.test.js     # Pruebas de contrato del profesor
-│   ├── main.test.js         # Prueba inicial del profesor
-│   └── model.test.js        # Pruebas de las clases del modelo
+│   ├── contrato.test.js     # Pruebas de contrato heredadas
+│   ├── functions.test.js    # Pruebas de funciones heredadas
+│   ├── main.test.js         # Prueba inicial heredada
+│   ├── model.test.js        # Pruebas de las clases del modelo
+│   └── persistence.test.js  # Pruebas de API y persistencia
 ├── .gitignore               # Archivos ignorados por Git
 ├── docker-compose.yml       # Configuración de Docker Compose
 ├── index.html               # HTML principal
@@ -146,7 +155,26 @@ cd BatoiBooks
 docker compose up -d
 ```
 
-Al arrancar el contenedor, se instalarán las dependencias y se ejecutará el proyecto. Puedes acceder a la aplicación en tu navegador en `http://localhost:5173`.
+Al arrancar los contenedores, se instalarán las dependencias, se iniciará la API en `http://localhost:3000` y se ejecutará el proyecto en `http://localhost:5173`.
+
+Para usar otra API, crea un fichero `.env` a partir de `.env.example` y define `VITE_API_URL` con su URL.
+
+### Desarrollo local sin Docker
+
+Instala las dependencias y abre dos terminales:
+
+```bash
+npm install
+npm run api
+```
+
+En la segunda terminal, inicia Vite:
+
+```bash
+npm run dev
+```
+
+La aplicación estará disponible en `http://localhost:5173` y la API en `http://localhost:3000`.
 
 ### Parar el proyecto
 
@@ -164,30 +192,13 @@ Este proyecto incluye pruebas con Vitest.
 docker compose exec batoibooks npm test -- --run
 ```
 
-### Ejecutar las pruebas de contrato del profesor
-
-```bash
-docker compose exec batoibooks npm run test:contrato -- --run
-```
-
-### Ejecutar las pruebas de funciones
-
-```bash
-docker compose exec batoibooks npm run test:functions -- --run
-```
-
-### Ejecutar las pruebas del modelo de clases
-
-```bash
-docker compose exec batoibooks npm run test:model -- --run
-```
-
 También puedes ejecutar los scripts directamente con `npm` si tienes Node.js instalado y las dependencias instaladas:
 
 ```bash
 npm test -- --run
-npm run test:model -- --run
 ```
+
+Las pruebas de persistencia usan MSW para simular la API, por lo que no necesitan que `json-server` esté arrancado.
 
 ## 👤 Autor
 

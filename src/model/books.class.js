@@ -1,31 +1,38 @@
 import Book from './book.class.js'
+import {
+  addDBBook,
+  changeDBBook,
+  getDBBooks,
+  removeDBBook,
+} from '../services/api.js'
 
 export default class Books {
   constructor() {
     this.data = []
   }
 
-  populate(books) {
+  async populate() {
+    const books = await getDBBooks()
     this.data = books.map((book) => new Book(book))
   }
 
-  addBook(bookData) {
-    const id = Math.max(0, ...this.data.map((book) => book.id)) + 1
-    const book = new Book({ ...bookData, id })
+  async addBook(bookData) {
+    const book = new Book(await addDBBook(bookData))
 
     this.data.push(book)
     return book
   }
 
-  removeBook(bookId) {
+  async removeBook(bookId) {
     const bookIndex = this.getBookIndexById(bookId)
 
+    await removeDBBook(bookId)
     this.data.splice(bookIndex, 1)
   }
 
-  changeBook(bookData) {
+  async changeBook(bookData) {
     const bookIndex = this.getBookIndexById(bookData.id)
-    const book = new Book(bookData)
+    const book = new Book(await changeDBBook(bookData))
 
     this.data[bookIndex] = book
     return book
@@ -86,12 +93,6 @@ export default class Books {
 
   booksNotSold() {
     return this.data.filter((book) => book.soldDate === '')
-  }
-
-  incrementPriceOfbooks(percentage) {
-    this.data.forEach((book) => {
-      book.price = Number((book.price * (1 + percentage)).toFixed(2))
-    })
   }
 
   toString() {

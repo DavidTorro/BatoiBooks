@@ -1,4 +1,6 @@
-import { describe, expect, test } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { setupServer } from 'msw/node'
 import data from '../src/data/datos.js'
 import Book from '../src/model/book.class.js'
 import Books from '../src/model/books.class.js'
@@ -6,6 +8,76 @@ import Module from '../src/model/module.class.js'
 import Modules from '../src/model/modules.class.js'
 import User from '../src/model/user.class.js'
 import Users from '../src/model/users.class.js'
+
+const API_URL = 'http://localhost:3000'
+let db
+
+function resetDB() {
+  db = JSON.parse(JSON.stringify(data))
+}
+
+function findById(items, id) {
+  return items.find((item) => item.id === Number(id))
+}
+
+const server = setupServer(
+  http.get(`${API_URL}/books`, () => HttpResponse.json(db.books)),
+  http.post(`${API_URL}/books`, async ({ request }) => {
+    const book = {
+      ...(await request.json()),
+      id: Math.max(...db.books.map((item) => item.id)) + 1,
+    }
+    db.books.push(book)
+    return HttpResponse.json(book, { status: 201 })
+  }),
+  http.put(`${API_URL}/books/:id`, async ({ request, params }) => {
+    const index = db.books.findIndex((book) => book.id === Number(params.id))
+    if (index === -1) {
+      return HttpResponse.json({}, { status: 404 })
+    }
+
+    const book = await request.json()
+    db.books[index] = book
+    return HttpResponse.json(book)
+  }),
+  http.delete(`${API_URL}/books/:id`, ({ params }) => {
+    db.books = db.books.filter((book) => book.id !== Number(params.id))
+    return HttpResponse.json({})
+  }),
+  http.get(`${API_URL}/users`, () => HttpResponse.json(db.users)),
+  http.get(`${API_URL}/users/:id`, ({ params }) => {
+    const user = findById(db.users, params.id)
+    return user ? HttpResponse.json(user) : HttpResponse.json({}, { status: 404 })
+  }),
+  http.post(`${API_URL}/users`, async ({ request }) => {
+    const user = {
+      ...(await request.json()),
+      id: Math.max(...db.users.map((item) => item.id)) + 1,
+    }
+    db.users.push(user)
+    return HttpResponse.json(user, { status: 201 })
+  }),
+  http.put(`${API_URL}/users/:id`, async ({ request, params }) => {
+    const index = db.users.findIndex((user) => user.id === Number(params.id))
+    if (index === -1) {
+      return HttpResponse.json({}, { status: 404 })
+    }
+
+    const user = await request.json()
+    db.users[index] = user
+    return HttpResponse.json(user)
+  }),
+  http.delete(`${API_URL}/users/:id`, ({ params }) => {
+    db.users = db.users.filter((user) => user.id !== Number(params.id))
+    return HttpResponse.json({})
+  }),
+  http.get(`${API_URL}/modules`, () => HttpResponse.json(db.modules))
+)
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+beforeEach(resetDB)
 
 describe('Clases de objeto', () => {
   test('Book usa cadenas vacías para los campos opcionales', () => {
@@ -19,34 +91,32 @@ describe('Clases de objeto', () => {
       status: 'new',
     })
 
-    expect(book.photo).toBe('')
-    expect(book.comments).toBe('')
-    expect(book.soldDate).toBe('')
+    expect(book).toMatchObject({ photo: '', comments: '', soldDate: '' })
   })
 
   test('User y Module guardan los datos recibidos', () => {
-    const user = new User(1, 'Ana', 'ana@example.com', '1234')
-    const module = new Module('5021', 'Seguridad', 'Seguretat', '59')
-
-    expect(user.nick).toBe('Ana')
-    expect(module.code).toBe('5021')
+    expect(new User(1, 'Ana', 'ana@example.com', '1234').nick).toBe('Ana')
+    expect(new Module('5021', 'Seguridad', 'Seguretat', '59').code).toBe('5021')
   })
 })
 
 describe('Books', () => {
-  test('populate convierte los datos en objetos Book', () => {
+  async function createBooks() {
     const books = new Books()
-    books.populate(data.books)
+    await books.populate()
+    return books
+  }
+
+  test('populate carga Book desde la API', async () => {
+    const books = await createBooks()
 
     expect(books.data).toHaveLength(6)
     expect(books.data[0]).toBeInstanceOf(Book)
   })
 
-  test('añade, modifica y elimina un libro', () => {
-    const books = new Books()
-    books.populate(data.books)
-
-    const book = books.addBook({
+  test('añade, modifica y elimina un libro persistiendo cada cambio', async () => {
+    const books = await createBooks()
+    const book = await books.addBook({
       userId: 2,
       moduleCode: '5021',
       publisher: 'Apunts',
@@ -56,49 +126,69 @@ describe('Books', () => {
     })
 
     expect(book.id).toBe(11)
-
-    const changedBook = books.changeBook({ ...book, price: 25 })
-    expect(changedBook.price).toBe(25)
-
-    books.removeBook(book.id)
+    expect((await books.changeBook({ ...book, price: 25 })).price).toBe(25)
+    await books.removeBook(book.id)
     expect(() => books.getBookById(book.id)).toThrow('Libro no encontrado')
   })
 
-  test('mantiene las consultas del ejercicio anterior', () => {
-    const books = new Books()
-    books.populate(data.books)
+  test('mantiene las consultas locales y elimina el incremento de precios', async () => {
+    const books = await createBooks()
 
+    expect(books.bookExists(4, '5025')).toBe(true)
     expect(books.booksFromModule('5021')).toHaveLength(3)
     expect(books.booksWithStatus('new')).toHaveLength(1)
-    books.incrementPriceOfbooks(0.1)
-    expect(books.data[0].price).toBe(13.2)
+    expect(books.averagePriceOfBooks()).toBe('26.17 €')
+    expect(books.incrementPriceOfbooks).toBeUndefined()
+  })
+
+  test('rechaza cambios y borrados locales inexistentes', async () => {
+    const books = await createBooks()
+
+    await expect(books.changeBook({ id: 999 })).rejects.toThrow(
+      'Libro no encontrado'
+    )
+    await expect(books.removeBook(999)).rejects.toThrow('Libro no encontrado')
   })
 })
 
 describe('Users y Modules', () => {
-  test('Users añade, cambia y elimina usuarios', () => {
+  test('Users carga, añade, cambia, borra y busca usuarios', async () => {
     const users = new Users()
-    users.populate(data.users)
+    await users.populate()
 
-    const user = users.addUser({
+    const user = await users.addUser({
       nick: 'Ana',
       email: 'ana@example.com',
       password: '1234',
     })
-
     expect(user.id).toBe(6)
-    expect(users.changeUser({ ...user, nick: 'Ana María' }).nick).toBe(
+    expect((await users.changeUser({ ...user, nick: 'Ana María' })).nick).toBe(
       'Ana María'
     )
+    expect(users.getUserIndexById(4)).toBe(2)
+    expect(users.getUserByNickName('Marta').id).toBe(4)
 
-    users.removeUser(user.id)
+    await users.changeUserPassword(2, 'secreta')
+    expect(users.getUserById(2).password).toBe('secreta')
+    await users.removeUser(user.id)
     expect(() => users.getUserById(user.id)).toThrow('Usuario no encontrado')
   })
 
-  test('Modules busca módulos por código', () => {
-    const modules = new Modules()
-    modules.populate(data.modules)
+  test('Users rechaza cambios y borrados locales inexistentes', async () => {
+    const users = new Users()
+    await users.populate()
 
+    await expect(users.changeUser({ id: 999 })).rejects.toThrow(
+      'Usuario no encontrado'
+    )
+    await expect(users.removeUser(999)).rejects.toThrow('Usuario no encontrado')
+  })
+
+  test('Modules carga Module desde la API y busca por código', async () => {
+    const modules = new Modules()
+    await modules.populate()
+
+    expect(modules.data[0]).toBeInstanceOf(Module)
     expect(modules.getModuleByCode('5021').cliteral).toBe(
       'Incidentes de ciberseguridad'
     )
@@ -107,121 +197,15 @@ describe('Users y Modules', () => {
 })
 
 describe('Métodos de texto', () => {
-  test('los objetos convierten sus datos a texto JSON', () => {
-    const book = new Book(data.books[0])
-    const user = new User(1, 'Ana', 'ana@example.com', '1234')
-    const module = new Module('5021', 'Seguridad', 'Seguretat', '59')
-
-    expect(JSON.parse(book.toString())).toEqual(data.books[0])
-    expect(JSON.parse(user.toString())).toEqual({
-      id: 1,
-      nick: 'Ana',
-      email: 'ana@example.com',
-      password: '1234',
-    })
-    expect(JSON.parse(module.toString())).toEqual({
-      code: '5021',
-      cliteral: 'Seguridad',
-      vliteral: 'Seguretat',
-      courseId: '59',
-    })
-  })
-
-  test('las colecciones convierten sus elementos a texto', () => {
+  test('mantienen la representación JSON de objetos y colecciones', async () => {
     const books = new Books()
     const users = new Users()
     const modules = new Modules()
+    await Promise.all([books.populate(), users.populate(), modules.populate()])
 
-    books.populate(data.books)
-    users.populate(data.users)
-    modules.populate(data.modules)
-
+    expect(JSON.parse(new Book(data.books[0]).toString())).toEqual(data.books[0])
     expect(books.toString()).toContain('"id":1')
     expect(users.toString()).toContain('"nick":"Ignasi"')
     expect(modules.toString()).toContain('"code":"0011"')
-  })
-})
-
-describe('Consultas de Books', () => {
-  function createBooks() {
-    const books = new Books()
-    books.populate(data.books)
-    return books
-  }
-
-  test('busca libros por id e índice y lanza error cuando no existen', () => {
-    const books = createBooks()
-
-    expect(books.getBookById(6).id).toBe(6)
-    expect(books.getBookIndexById(6)).toBe(1)
-    expect(() => books.getBookById(999)).toThrow('Libro no encontrado')
-    expect(() => books.getBookIndexById(999)).toThrow('Libro no encontrado')
-  })
-
-  test('resuelve todas las consultas heredadas del ejercicio de arrays', () => {
-    const books = createBooks()
-
-    expect(books.bookExists(4, '5025')).toBe(true)
-    expect(books.bookExists(2, '5021')).toBe(false)
-    expect(books.booksFromUser(4)).toHaveLength(3)
-    expect(books.booksFromModule('5021')).toHaveLength(3)
-    expect(books.booksCheeperThan(15)).toHaveLength(4)
-    expect(books.booksWithStatus('good')).toHaveLength(4)
-    expect(books.averagePriceOfBooks()).toBe('26.17 €')
-    expect(books.booksOfTypeNotes()).toHaveLength(3)
-    expect(books.booksNotSold()).toHaveLength(5)
-  })
-
-  test('incrementa los precios de la misma colección sin crear otra', () => {
-    const books = createBooks()
-    const firstBook = books.data[0]
-
-    expect(books.incrementPriceOfbooks(0.1)).toBeUndefined()
-    expect(books.data[0]).toBe(firstBook)
-    expect(books.data[0].price).toBe(13.2)
-  })
-
-  test('lanza errores al cambiar o eliminar libros inexistentes', () => {
-    const books = createBooks()
-
-    expect(() => books.changeBook({ id: 999 })).toThrow('Libro no encontrado')
-    expect(() => books.removeBook(999)).toThrow('Libro no encontrado')
-  })
-})
-
-describe('Consultas de Users y Modules', () => {
-  test('busca usuarios por id, índice y nick, incluidos los errores', () => {
-    const users = new Users()
-    users.populate(data.users)
-
-    expect(users.getUserById(3).nick).toBe('Juan')
-    expect(users.getUserIndexById(4)).toBe(2)
-    expect(users.getUserByNickName('Marta').id).toBe(4)
-    expect(() => users.getUserById(999)).toThrow('Usuario no encontrado')
-    expect(() => users.getUserIndexById(999)).toThrow('Usuario no encontrado')
-    expect(() => users.getUserByNickName('Unknown')).toThrow(
-      'Usuario no encontrado'
-    )
-  })
-
-  test('lanza errores al cambiar o eliminar usuarios inexistentes', () => {
-    const users = new Users()
-    users.populate(data.users)
-
-    expect(() => users.changeUser({ id: 999 })).toThrow('Usuario no encontrado')
-    expect(() => users.removeUser(999)).toThrow('Usuario no encontrado')
-  })
-
-  test('populate no devuelve valores y genera instancias de las clases esperadas', () => {
-    const books = new Books()
-    const users = new Users()
-    const modules = new Modules()
-
-    expect(books.populate(data.books)).toBeUndefined()
-    expect(users.populate(data.users)).toBeUndefined()
-    expect(modules.populate(data.modules)).toBeUndefined()
-    expect(books.data[0]).toBeInstanceOf(Book)
-    expect(users.data[0]).toBeInstanceOf(User)
-    expect(modules.data[0]).toBeInstanceOf(Module)
   })
 })

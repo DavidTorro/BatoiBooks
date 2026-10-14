@@ -1,11 +1,13 @@
 import Module from './module.class.js'
+import { getDBModules } from '../services/api.js'
 
 export default class Modules {
   constructor() {
     this.data = []
   }
 
-  populate(modules) {
+  async populate() {
+    const modules = await getDBModules()
     this.data = modules.map(
       (module) =>
         new Module(
