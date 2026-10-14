@@ -1,42 +1,66 @@
 import User from './user.class.js'
+import {
+  addDBUser,
+  changeDBUser,
+  changeDBUserPassword,
+  getDBUsers,
+  removeDBUser,
+} from '../services/api.js'
 
 export default class Users {
   constructor() {
     this.data = []
   }
 
-  populate(users) {
+  async populate() {
+    const users = await getDBUsers()
     this.data = users.map(
       (user) => new User(user.id, user.nick, user.email, user.password)
     )
   }
 
-  addUser(userData) {
-    const id = Math.max(0, ...this.data.map((user) => user.id)) + 1
+  async addUser(userData) {
+    const userDataFromDB = await addDBUser(userData)
     const user = new User(
-      id,
-      userData.nick,
-      userData.email,
-      userData.password
+      userDataFromDB.id,
+      userDataFromDB.nick,
+      userDataFromDB.email,
+      userDataFromDB.password
     )
 
     this.data.push(user)
     return user
   }
 
-  removeUser(userId) {
+  async removeUser(userId) {
     const userIndex = this.getUserIndexById(userId)
 
+    await removeDBUser(userId)
     this.data.splice(userIndex, 1)
   }
 
-  changeUser(userData) {
+  async changeUser(userData) {
     const userIndex = this.getUserIndexById(userData.id)
+    const userDataFromDB = await changeDBUser(userData)
     const user = new User(
-      userData.id,
-      userData.nick,
-      userData.email,
-      userData.password
+      userDataFromDB.id,
+      userDataFromDB.nick,
+      userDataFromDB.email,
+      userDataFromDB.password
+    )
+
+    this.data[userIndex] = user
+    return user
+  }
+
+  async changeUserPassword(userId, password) {
+    const userIndex = this.getUserIndexById(userId)
+    const userDataFromDB = await changeDBUserPassword(userId, password)
+    const user = new User(
+      userDataFromDB.id,
+      userDataFromDB.nick,
+      userDataFromDB.email,
+      userDataFromDB.password
     )
 
     this.data[userIndex] = user
