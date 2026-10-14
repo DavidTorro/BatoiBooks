@@ -89,13 +89,9 @@ export default class Books {
   }
 
   incrementPriceOfbooks(percentage) {
-    return this.data.map(
-      (book) =>
-        new Book({
-          ...book,
-          price: Number((book.price * (1 + percentage)).toFixed(2)),
-        })
-    )
+    this.data.forEach((book) => {
+      book.price = Number((book.price * (1 + percentage)).toFixed(2))
+    })
   }
 
   toString() {

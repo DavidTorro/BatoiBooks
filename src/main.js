@@ -13,4 +13,5 @@ books.populate(data.books)
 
 console.log(books.booksFromModule('5021'))
 console.log(books.booksWithStatus('new'))
-console.log(books.incrementPriceOfbooks(0.1))
+books.incrementPriceOfbooks(0.1)
+console.log(books.toString())

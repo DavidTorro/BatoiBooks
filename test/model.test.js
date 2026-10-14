@@ -70,7 +70,8 @@ describe('Books', () => {
 
     expect(books.booksFromModule('5021')).toHaveLength(3)
     expect(books.booksWithStatus('new')).toHaveLength(1)
-    expect(books.incrementPriceOfbooks(0.1)[0].price).toBe(13.2)
+    books.incrementPriceOfbooks(0.1)
+    expect(books.data[0].price).toBe(13.2)
   })
 })
 
