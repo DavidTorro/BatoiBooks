@@ -12,12 +12,117 @@
     <link rel="stylesheet" href="./src/style/styles.css" />
   </head>
   <body>
-    <header>
-      <img src="/logoBatoi.png" alt="Logo del CIP FP Batoi" />
-      <h1>BatoiBooks</h1>
-      <p>Abre la consola para ver el resultado.</p>
-    </header>
+    <template id="page-template">
+      <header class="site-header">
+        <div class="header-inner">
+          <a class="brand" href="#list" aria-label="BatoiBooks, ir a los libros">
+            <img src="/logoBatoi.png" alt="Logo del CIP FP Batoi">
+            <h1>BatoiBooks</h1>
+          </a>
+          <nav aria-label="Navegación principal">
+            <ul>
+              <li><a href="#list">Ver Libros</a></li>
+              <li><a href="#form">Añadir Libro</a></li>
+              <li><a href="#about">Acerca de...</a></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
 
+      <main class="page-content">
+        <div id="messages" aria-live="polite"></div>
+
+        <section class="books-section" aria-labelledby="books-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Libros y apuntes de segunda mano</p>
+              <h2 id="books-heading">Libros disponibles</h2>
+            </div>
+            <p>Encuentra materiales de otros estudiantes del CIP FP Batoi.</p>
+          </div>
+          <div id="list" class="books-grid"></div>
+        </section>
+
+        <div id="remove" class="panel" aria-labelledby="remove-heading">
+          <h2 id="remove-heading">Borrar libro</h2>
+          <p>Introduce el ID del libro que quieras eliminar.</p>
+          <div class="remove-fields">
+            <label for="remove-book-id">ID del libro</label>
+            <input id="remove-book-id" name="bookId" type="number" min="1" step="1" inputmode="numeric">
+            <button id="remove-book-button" type="button">Borrar libro</button>
+          </div>
+        </div>
+
+        <div id="form" class="panel" aria-labelledby="form-heading">
+          <h2 id="form-heading">Añadir libro</h2>
+          <p>Rellena los datos del libro o los apuntes que quieres vender.</p>
+          <form id="book-form">
+            <div class="form-grid">
+              <div class="field">
+                <label for="userId">Usuario</label>
+                <select id="userId" name="userId" required>
+                  <option value="">Selecciona un usuario</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="moduleCode">Módulo</label>
+                <select id="moduleCode" name="moduleCode" required>
+                  <option value="">Selecciona un módulo</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="publisher">Editorial</label>
+                <input id="publisher" name="publisher" type="text" required>
+              </div>
+              <div class="field">
+                <label for="price">Precio (€)</label>
+                <input id="price" name="price" type="number" min="0" step="0.01" required>
+              </div>
+              <div class="field">
+                <label for="pages">Páginas</label>
+                <input id="pages" name="pages" type="number" min="1" step="1" required>
+              </div>
+              <div class="field">
+                <fieldset id="status" class="status-field">
+                  <legend>Estado</legend>
+                  <div class="radio-options">
+                    <label><input id="status-new" name="status" type="radio" value="new" required> Nuevo</label>
+                    <label><input id="status-good" name="status" type="radio" value="good"> Bueno</label>
+                    <label><input id="status-used" name="status" type="radio" value="used"> Usado</label>
+                    <label><input id="status-bad" name="status" type="radio" value="bad"> Malo</label>
+                    <label><input id="status-digital" name="status" type="radio" value="digital"> Digital</label>
+                  </div>
+                </fieldset>
+              </div>
+              <div class="field">
+                <label for="photo">Foto (URL)</label>
+                <input id="photo" name="photo" type="text">
+              </div>
+              <div class="field">
+                <label for="soldDate">Fecha de venta</label>
+                <input id="soldDate" name="soldDate" type="date">
+              </div>
+              <div class="field field-wide">
+                <label for="comments">Comentarios</label>
+                <textarea id="comments" name="comments" rows="4"></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit">Guardar</button>
+              <button type="reset" class="button-secondary">Reset</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="about" class="panel about-panel" aria-labelledby="about-heading">
+          <h2 id="about-heading">Acerca de BatoiBooks</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. BatoiBooks conecta a estudiantes que quieren vender y comprar libros de texto y apuntes.</p>
+        </div>
+      </main>
+
+      <footer class="site-footer">David Torró · CIP FP Batoi</footer>
+    </template>
+    <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

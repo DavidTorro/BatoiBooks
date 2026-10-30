@@ -1,13 +1,13 @@
-import Books from './model/books.class.js'
-import Modules from './model/modules.class.js'
-import Users from './model/users.class.js'
+import Controller from './controller/controller.class.js'
 
-const modules = new Modules()
-const users = new Users()
-const books = new Books()
+document.addEventListener('DOMContentLoaded', async () => {
+  const template = document.querySelector('#page-template')
+  document.querySelector('#app').append(template.content.cloneNode(true))
 
-await Promise.all([modules.populate(), users.populate(), books.populate()])
-
-console.log(books.booksFromModule('5021'))
-console.log(books.booksWithStatus('new'))
-console.log(books.averagePriceOfBooks())
+  const myController = new Controller()
+  if (await myController.init()) {
+    console.log(myController.books.booksFromModule('5021'))
+    console.log(myController.books.booksWithStatus('new'))
+    console.log(myController.books.averagePriceOfBooks())
+  }
+})
