@@ -6,11 +6,11 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-4b61c9?style=for-the-badge)
 
-Batoibooks es una aplicación para consultar libros de texto y apuntes relacionados con módulos educativos y usuarios. Carga y persiste los datos mediante una API HTTP, mostrando los resultados por consola. Incluye pruebas unitarias con Vitest y se ejecuta mediante Vite para desarrollo.
+BatoiBooks es una aplicación para consultar y gestionar libros de texto y apuntes de segunda mano. Muestra los libros en la página, permite añadirlos y borrarlos, y guarda los cambios mediante una API HTTP. Está desarrollada con JavaScript y Vite, y cuenta con pruebas automatizadas con Vitest.
 
 ## ⚙️ Tecnologías
 
-- 🧪 **Pruebas**: Vitest, MSW
+- 🧪 **Pruebas**: Vitest, jsdom, MSW
 - 💾 **Persistencia**: JSON Server
 - 🐳 **Infraestructura**: Docker, GitHub Actions
 - 🔧 **Herramientas**: Vite, Node.js
@@ -23,6 +23,8 @@ Batoibooks es una aplicación para consultar libros de texto y apuntes relaciona
 - 🔌 Servicios HTTP centralizados en `src/services/api.js`
 - 📚 Colecciones de libros, usuarios y módulos persistentes
 - 🔧 Filtrado y consulta de libros por usuario, módulo y estado
+- 🖥️ Listado de libros y desplegables de usuarios y módulos generados en el DOM
+- ➕ Formularios para añadir libros y borrarlos por ID, con mensajes de resultado
 - ⚙️ Flujo de trabajo CI/CD automatizado con GitHub Actions
 
 <!-- readme-gen:architecture:start -->
@@ -43,46 +45,21 @@ Batoibooks es una aplicación para consultar libros de texto y apuntes relaciona
 }}%%
 
 flowchart LR
-    subgraph SG0["🌐 Aplicación"]
-        direction LR
-        app["🚀 Punto de entrada<br/>src/main.js"]
-    end
-
-    subgraph SG1["⚙️ Lógica"]
-        direction LR
-        logic["🔧 Clases del dominio<br/>src/model"]
-    end
-
-    subgraph SG2["🔌 Persistencia"]
-        direction LR
-        data["🔌 Servicios HTTP<br/>src/services/api.js"]
-        database["💾 JSON Server<br/>batoibooks.json"]
-    end
-
-    app -- "carga" --> logic
-    logic -- "consulta" --> data
-    data -- "HTTP" --> database
-
-    classDef g0 fill:#0f172a,stroke:#38bdf8,color:#f8fafc,stroke-width:2px;
-    class app g0;
-
-    classDef g1 fill:#111827,stroke:#c084fc,color:#f8fafc,stroke-width:2px;
-    class logic g1;
-
-    classDef g2 fill:#08111f,stroke:#34d399,color:#f8fafc,stroke-width:2px;
-    class data g2;
-
-    style SG0 fill:#0b1220,stroke:#38bdf8,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG1 fill:#0b1220,stroke:#c084fc,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
-    style SG2 fill:#0b1220,stroke:#34d399,stroke-width:1.5px,stroke-dasharray: 4 4,color:#e2e8f0
+    app["src/main.js"] --> controller["src/controller"]
+    controller --> view["src/view"]
+    controller --> model["src/model"]
+    model --> api["src/services/api.js"]
+    api -- HTTP --> database["JSON Server<br/>src/data/batoibooks.json"]
+    view -- DOM --> page["index.html"]
 ```
 
-| Componente | Tecnología | Detalle                                     |
-| ---------- | ---------- | ------------------------------------------- |
-| Aplicación | Vite       | Punto de entrada principal en `src/main.js` |
-| Lógica     | JavaScript | Clases principales en `src/model/`          |
-| Datos      | JSON Server | API local servida desde `src/data/batoibooks.json` |
-| Pruebas    | Vitest + MSW | Tests automatizados y simulación de la API |
+| Componente | Detalle |
+| ---------- | ------- |
+| Entrada | `src/main.js` crea la página a partir de la plantilla de `index.html` e inicia el controlador. |
+| Controlador | `src/controller/` carga los datos y coordina las acciones del usuario. |
+| Vista | `src/view/` renderiza libros, opciones y mensajes; recoge los datos del formulario. |
+| Modelo y API | `src/model/` consulta `src/services/api.js`, que se comunica con JSON Server. |
+| Pruebas | Vitest comprueba modelo, vista y controlador; jsdom simula el DOM y MSW la API. |
 
 <!-- readme-gen:architecture:end -->
 
@@ -95,12 +72,17 @@ batoibooks/
 │       └── ci.yml           # Flujo de CI
 ├── assets/                  # Recursos del proyecto
 │   └── banner.svg           # Banner del proyecto
-├── notes/                   # Enunciado del proyecto
+├── notes/                   # Apuntes de las prácticas
 │   ├── 1-introduccion.md
 │   ├── 2-arrays.md
 │   ├── 3-clases.md
 │   ├── 4-ajax.md
+│   ├── 5-dom.md
+│   ├── 5.1-test-dom.md
 │   └── assets/
+│       ├── errorRed.png
+│       ├── imagen.png
+│       ├── mostrarLibros.png
 │       ├── resultado-ajax.png
 │       └── resultado-clases.png
 ├── public/                  # Recursos públicos
@@ -108,8 +90,10 @@ batoibooks/
 │   ├── icons.svg
 │   └── logoBatoi.png
 ├── src/                     # Código fuente
+│   ├── controller/          # Carga de datos y acciones de la interfaz
+│   │   └── controller.class.js
 │   ├── data/                # Datos
-│   │   └── batoibooks.json
+│   │   ├── batoibooks.json
 │   │   └── datos.js          # Datos heredados de prácticas anteriores
 │   ├── model/               # Clases del dominio
 │   │   ├── book.class.js
@@ -122,14 +106,18 @@ batoibooks/
 │   │   └── api.js
 │   ├── style/               # Estilos
 │   │   └── styles.css
+│   ├── view/                # Renderizado y eventos del DOM
+│   │   └── view.class.js
 │   ├── functions.js         # Funciones heredadas de prácticas anteriores
 │   └── main.js              # Punto de entrada principal
 ├── test/                    # Pruebas
 │   ├── contrato.test.js     # Pruebas de contrato heredadas
+│   ├── controller.test.js   # Pruebas de carga, alta y borrado
 │   ├── functions.test.js    # Pruebas de funciones heredadas
 │   ├── main.test.js         # Prueba inicial heredada
 │   ├── model.test.js        # Pruebas de las clases del modelo
-│   └── persistence.test.js  # Pruebas de API y persistencia
+│   ├── persistence.test.js  # Pruebas de API y persistencia
+│   └── view.test.js         # Pruebas de renderizado y formularios
 ├── .gitignore               # Archivos ignorados por Git
 ├── docker-compose.yml       # Configuración de Docker Compose
 ├── index.html               # HTML principal
@@ -138,9 +126,11 @@ batoibooks/
 └── README.md                # Documentación del proyecto
 ```
 
+Los enunciados de las prácticas DOM están en [5-dom.md](notes/5-dom.md) y [5.1-test-dom.md](notes/5.1-test-dom.md).
+
 ## 📦 Instalación
 
-Necesitaremos tener Docker con Docker Compose instalado en nuestro sistema.
+Puedes arrancar la aplicación con Docker Compose o con Node.js instalado en tu equipo.
 
 ### Clonar el repositorio
 
@@ -198,7 +188,7 @@ También puedes ejecutar los scripts directamente con `npm` si tienes Node.js in
 npm test -- --run
 ```
 
-Las pruebas de persistencia usan MSW para simular la API, por lo que no necesitan que `json-server` esté arrancado.
+Las pruebas de persistencia y del controlador usan MSW para simular la API; las de la vista y el controlador usan jsdom para simular el navegador. No es necesario arrancar `json-server` para ejecutarlas.
 
 ## 👤 Autor
 
