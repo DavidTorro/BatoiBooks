@@ -10,3 +10,4 @@ await Promise.all([modules.populate(), users.populate(), books.populate()])
 
 console.log(books.booksFromModule('5021'))
 console.log(books.booksWithStatus('new'))
+console.log(books.averagePriceOfBooks())
