@@ -16,6 +16,7 @@
     "test:model": "vitest test/model.test.js"
   },
   "devDependencies": {
+    "jsdom": "^29.1.1",
     "json-server": "^0.17.4",
     "msw": "^2.15.0",
     "vite": "^8.3.0",
