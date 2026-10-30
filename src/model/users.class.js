@@ -3,6 +3,7 @@ import {
   addDBUser,
   changeDBUser,
   changeDBUserPassword,
+  getDBUser,
   getDBUsers,
   removeDBUser,
 } from '../services/api.js'
@@ -67,14 +68,9 @@ export default class Users {
     return user
   }
 
-  getUserById(userId) {
-    const user = this.data.find((item) => item.id === userId)
-
-    if (!user) {
-      throw new Error('Usuario no encontrado')
-    }
-
-    return user
+  async getUserById(userId) {
+    const user = await getDBUser(userId)
+    return new User(user.id, user.nick, user.email, user.password)
   }
 
   getUserIndexById(userId) {

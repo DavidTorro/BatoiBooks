@@ -169,9 +169,9 @@ describe('Users y Modules', () => {
     expect(users.getUserByNickName('Marta').id).toBe(4)
 
     await users.changeUserPassword(2, 'secreta')
-    expect(users.getUserById(2).password).toBe('secreta')
+    expect((await users.getUserById(2)).password).toBe('secreta')
     await users.removeUser(user.id)
-    expect(() => users.getUserById(user.id)).toThrow('Usuario no encontrado')
+    await expect(users.getUserById(user.id)).rejects.toThrow('Error en la petición: 404')
   })
 
   test('Users rechaza cambios y borrados locales inexistentes', async () => {

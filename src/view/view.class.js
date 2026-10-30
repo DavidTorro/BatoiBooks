@@ -8,6 +8,7 @@ export default class View {
     this.userSelect = document.querySelector('#userId')
     this.messages = document.querySelector('#messages')
     this.removeBookInput = document.querySelector('#remove-book-id')
+    this.removeBookButton = document.querySelector('#remove-book-button')
   }
 
   renderModules(modules) {
@@ -123,6 +124,30 @@ export default class View {
       comments: data.get('comments').trim(),
       soldDate: data.get('soldDate'),
     }
+  }
+
+  bindSubmitBook(callback) {
+    this.bookForm.addEventListener('submit', (event) => {
+      event.preventDefault()
+
+      if (this.bookForm.checkValidity()) {
+        callback(this.getBookFormData())
+      }
+    })
+  }
+
+  bindRemoveBook(callback) {
+    this.removeBookButton.addEventListener('click', () => {
+      const value = this.getRemoveBookId().trim()
+      const id = Number(value)
+
+      if (!value || !Number.isInteger(id) || id < 1) {
+        this.showMessage('error', 'Indica una ID de libro válida')
+        return
+      }
+
+      callback(id)
+    })
   }
 
   resetBookForm() {

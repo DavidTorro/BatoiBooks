@@ -266,10 +266,18 @@ describe('Colecciones persistentes', () => {
     expect(users.getUserByNickName('Ana María').id).toBe(6)
 
     await users.changeUserPassword(2, 'secreta')
-    expect(users.getUserById(2).password).toBe('secreta')
+    expect((await users.getUserById(2)).password).toBe('secreta')
 
     await users.removeUser(6)
-    expect(() => users.getUserById(6)).toThrow('Usuario no encontrado')
+    await expect(users.getUserById(6)).rejects.toThrow('Error en la petición: 404')
+  })
+
+  test('getUserById consulta la API sin populate y rechaza usuarios inexistentes', async () => {
+    const users = new Users()
+
+    await expect(users.getUserById(2)).resolves.toBeInstanceOf(User)
+    await expect(users.getUserById(999)).rejects.toThrow('Error en la petición: 404')
+    expect(users.data).toEqual([])
   })
 
   test('conserva las consultas locales y elimina el incremento de precios', async () => {

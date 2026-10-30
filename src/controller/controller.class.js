@@ -27,6 +27,8 @@ export default class Controller {
       this.view.renderUsers(this.users.data)
       this.view.renderModules(this.modules.data)
       this.view.renderBooks(this.books.data, this.modules.data)
+      this.view.bindSubmitBook((bookData) => this.handleSubmitBook(bookData))
+      this.view.bindRemoveBook((bookId) => this.handleRemoveBook(bookId))
       return true
     } catch (error) {
       this.view.showMessage('error', `Error cargando los datos: ${error.message}`)
