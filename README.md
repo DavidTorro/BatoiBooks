@@ -6,7 +6,7 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-4b61c9?style=for-the-badge)
 
-BatoiBooks es una aplicación para consultar y gestionar libros de texto y apuntes de segunda mano. Muestra los libros en la página, permite añadirlos y borrarlos, y guarda los cambios mediante una API HTTP. Está desarrollada con JavaScript y Vite, y cuenta con pruebas automatizadas con Vitest.
+BatoiBooks es una aplicación para consultar y gestionar libros de texto y apuntes de segunda mano. Permite añadir, editar y eliminar libros, además de añadirlos a un carrito de compra. Los cambios en los libros se guardan mediante una API HTTP. Está desarrollada con JavaScript y Vite, y cuenta con pruebas automatizadas con Vitest.
 
 ## ⚙️ Tecnologías
 
@@ -23,8 +23,10 @@ BatoiBooks es una aplicación para consultar y gestionar libros de texto y apunt
 - 🔌 Servicios HTTP centralizados en `src/services/api.js`
 - 📚 Colecciones de libros, usuarios y módulos persistentes
 - 🔧 Filtrado y consulta de libros por usuario, módulo y estado
-- 🖥️ Listado de libros y desplegables de usuarios y módulos generados en el DOM
-- ➕ Formularios para añadir libros y borrarlos por ID, con mensajes de resultado
+- 🖥️ Listado de libros y desplegable de módulos generados en el DOM
+- ➕ Formulario compartido para añadir y editar libros; botones en cada tarjeta para comprar, editar o eliminar
+- 🛒 Carrito en memoria que guarda una copia del libro y avisa si ya está añadido
+- 💬 Confirmación antes de eliminar y mensajes de resultado de las acciones
 - ⚙️ Flujo de trabajo CI/CD automatizado con GitHub Actions
 
 <!-- readme-gen:architecture:start -->
@@ -48,6 +50,7 @@ flowchart LR
     app["src/main.js"] --> controller["src/controller"]
     controller --> view["src/view"]
     controller --> model["src/model"]
+    controller --> cart["Cart en memoria"]
     model --> api["src/services/api.js"]
     api -- HTTP --> database["JSON Server<br/>src/data/batoibooks.json"]
     view -- DOM --> page["index.html"]
@@ -56,10 +59,11 @@ flowchart LR
 | Componente | Detalle |
 | ---------- | ------- |
 | Entrada | `src/main.js` crea la página a partir de la plantilla de `index.html` e inicia el controlador. |
-| Controlador | `src/controller/` carga los datos y coordina las acciones del usuario. |
-| Vista | `src/view/` renderiza libros, opciones y mensajes; recoge los datos del formulario. |
+| Controlador | `src/controller/` carga los datos y coordina el alta, la edición, el carrito y el borrado. |
+| Vista | `src/view/` renderiza libros, opciones y mensajes; recoge el formulario y escucha las acciones de cada tarjeta. |
 | Modelo y API | `src/model/` consulta `src/services/api.js`, que se comunica con JSON Server. |
-| Pruebas | Vitest comprueba modelo, vista y controlador; jsdom simula el DOM y MSW la API. |
+| Carrito | `src/model/cart.class.js` guarda copias de libros en memoria durante la sesión. |
+| Pruebas | Vitest comprueba modelo, carrito, vista y controlador; jsdom simula el DOM y MSW la API. |
 
 <!-- readme-gen:architecture:end -->
 
@@ -79,8 +83,10 @@ batoibooks/
 │   ├── 4-ajax.md
 │   ├── 5-dom.md
 │   ├── 5.1-test-dom.md
+│   ├── 6-eventos.md
 │   └── assets/
 │       ├── errorRed.png
+│       ├── eventos.png
 │       ├── imagen.png
 │       ├── mostrarLibros.png
 │       ├── resultado-ajax.png
@@ -98,6 +104,7 @@ batoibooks/
 │   ├── model/               # Clases del dominio
 │   │   ├── book.class.js
 │   │   ├── books.class.js
+│   │   ├── cart.class.js
 │   │   ├── module.class.js
 │   │   ├── modules.class.js
 │   │   ├── user.class.js
@@ -106,18 +113,19 @@ batoibooks/
 │   │   └── api.js
 │   ├── style/               # Estilos
 │   │   └── styles.css
-│   ├── view/                # Renderizado y eventos del DOM
+│   ├── view/                # Renderizado, formulario y eventos del DOM
 │   │   └── view.class.js
 │   ├── functions.js         # Funciones heredadas de prácticas anteriores
 │   └── main.js              # Punto de entrada principal
 ├── test/                    # Pruebas
+│   ├── cart.test.js         # Copias, duplicados y borrado del carrito
 │   ├── contrato.test.js     # Pruebas de contrato heredadas
-│   ├── controller.test.js   # Pruebas de carga, alta y borrado
+│   ├── controller.test.js   # Pruebas de carga, alta, edición, carrito y borrado
 │   ├── functions.test.js    # Pruebas de funciones heredadas
 │   ├── main.test.js         # Prueba inicial heredada
 │   ├── model.test.js        # Pruebas de las clases del modelo
 │   ├── persistence.test.js  # Pruebas de API y persistencia
-│   └── view.test.js         # Pruebas de renderizado y formularios
+│   └── view.test.js         # Pruebas de renderizado, formularios y botones
 ├── .gitignore               # Archivos ignorados por Git
 ├── docker-compose.yml       # Configuración de Docker Compose
 ├── index.html               # HTML principal
@@ -126,7 +134,7 @@ batoibooks/
 └── README.md                # Documentación del proyecto
 ```
 
-Los enunciados de las prácticas DOM están en [5-dom.md](notes/5-dom.md) y [5.1-test-dom.md](notes/5.1-test-dom.md).
+Los enunciados de las prácticas DOM están en [5-dom.md](notes/5-dom.md), [5.1-test-dom.md](notes/5.1-test-dom.md) y [6-eventos.md](notes/6-eventos.md).
 
 ## 📦 Instalación
 

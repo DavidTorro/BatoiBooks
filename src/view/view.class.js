@@ -3,12 +3,12 @@ export default class View {
     this.booksList = document.querySelector('#list')
     this.about = document.querySelector('#about')
     this.form = document.querySelector('#form')
+    this.formHeading = document.querySelector('#form-heading')
     this.bookForm = document.querySelector('#book-form')
+    this.bookIdField = document.querySelector('#book-id-field')
+    this.bookIdInput = document.querySelector('#bookId')
     this.moduleSelect = document.querySelector('#moduleCode')
-    this.userSelect = document.querySelector('#userId')
     this.messages = document.querySelector('#messages')
-    this.removeBookInput = document.querySelector('#remove-book-id')
-    this.removeBookButton = document.querySelector('#remove-book-button')
   }
 
   renderModules(modules) {
@@ -16,14 +16,6 @@ export default class View {
 
     for (const module of modules) {
       this.moduleSelect.add(new Option(`${module.code} · ${module.cliteral}`, module.code))
-    }
-  }
-
-  renderUsers(users) {
-    this.userSelect.replaceChildren(new Option('Selecciona un usuario', ''))
-
-    for (const user of users) {
-      this.userSelect.add(new Option(`${user.nick} (${user.id})`, user.id))
     }
   }
 
@@ -36,6 +28,16 @@ export default class View {
   }
 
   renderBook(book, modules) {
+    this.booksList.append(this.createBookCard(book, modules))
+  }
+
+  updateBook(book, modules) {
+    const card = [...this.booksList.querySelectorAll('.card')]
+      .find((item) => item.dataset.bookId === String(book.id))
+    card.replaceWith(this.createBookCard(book, modules))
+  }
+
+  createBookCard(book, modules) {
     const module = modules.find((item) => item.code === book.moduleCode)
     const card = document.createElement('article')
     card.className = 'card'
@@ -75,9 +77,31 @@ export default class View {
     price.className = 'card-price'
     price.textContent = `${Number(book.price).toFixed(2)} €`
 
+    const actions = document.createElement('div')
+    actions.className = 'card-actions'
+    actions.append(
+      this.createActionButton('cart', 'add_shopping_cart', `Añadir libro ${book.id} al carrito`),
+      this.createActionButton('edit', 'edit', `Editar libro ${book.id}`),
+      this.createActionButton('delete', 'delete', `Eliminar libro ${book.id}`)
+    )
+
     body.append(moduleName, publisher, pages, status, sale, comments, price)
-    card.append(imageContainer, body)
-    this.booksList.append(card)
+    card.append(imageContainer, body, actions)
+    return card
+  }
+
+  createActionButton(action, iconName, label) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.dataset.action = action
+    button.setAttribute('aria-label', label)
+
+    const icon = document.createElement('span')
+    icon.className = 'material-icons'
+    icon.setAttribute('aria-hidden', 'true')
+    icon.textContent = iconName
+    button.append(icon)
+    return button
   }
 
   removeBook(bookId) {
@@ -87,6 +111,8 @@ export default class View {
         break
       }
     }
+
+    if (this.bookIdInput.value === String(bookId)) this.resetBookForm()
   }
 
   showMessage(type, message) {
@@ -114,7 +140,7 @@ export default class View {
     const data = new FormData(this.bookForm)
 
     return {
-      userId: Number(data.get('userId')),
+      ...(this.bookIdInput.value ? { id: Number(this.bookIdInput.value) } : {}),
       moduleCode: data.get('moduleCode'),
       publisher: data.get('publisher').trim(),
       price: Number(data.get('price')),
@@ -136,30 +162,53 @@ export default class View {
     })
   }
 
-  bindRemoveBook(callback) {
-    this.removeBookButton.addEventListener('click', () => {
-      const value = this.getRemoveBookId().trim()
-      const id = Number(value)
+  bindBookActions({ onAddToCart, onEdit, onRemove }) {
+    this.booksList.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-action]')
+      const card = button?.closest('.card')
 
-      if (!value || !Number.isInteger(id) || id < 1) {
-        this.showMessage('error', 'Indica una ID de libro válida')
-        return
-      }
+      if (!card || !this.booksList.contains(card)) return
 
-      callback(id)
+      const bookId = Number(card.dataset.bookId)
+      if (button.dataset.action === 'cart') onAddToCart(bookId)
+      if (button.dataset.action === 'edit') onEdit(bookId)
+      if (button.dataset.action === 'delete') onRemove(bookId)
     })
+  }
+
+  bindResetBookForm() {
+    this.bookForm.addEventListener('reset', () => this.showAddBookForm())
+  }
+
+  showEditBookForm(book) {
+    this.formHeading.textContent = 'Editar libro'
+    this.bookIdField.hidden = false
+    this.bookIdInput.value = String(book.id)
+    this.bookForm.elements.moduleCode.value = book.moduleCode
+    this.bookForm.elements.publisher.value = book.publisher
+    this.bookForm.elements.price.value = String(book.price)
+    this.bookForm.elements.pages.value = String(book.pages)
+    this.bookForm.elements.photo.value = book.photo
+    this.bookForm.elements.comments.value = book.comments
+    this.bookForm.elements.soldDate.value = book.soldDate
+    const status = [...this.bookForm.querySelectorAll('[name="status"]')]
+      .find((input) => input.value === book.status)
+    if (status) status.checked = true
+  }
+
+  showAddBookForm() {
+    this.formHeading.textContent = 'Añadir libro'
+    this.bookIdField.hidden = true
+    this.bookIdInput.value = ''
   }
 
   resetBookForm() {
     this.bookForm.reset()
+    this.showAddBookForm()
   }
 
-  getRemoveBookId() {
-    return this.removeBookInput.value
-  }
-
-  clearRemoveBookId() {
-    this.removeBookInput.value = ''
+  confirmRemoveBook(book, moduleName) {
+    return window.confirm(`¿Eliminar el libro ${book.id} del módulo ${moduleName}?`)
   }
 
   formatDate(date) {

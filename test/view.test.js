@@ -26,18 +26,19 @@ beforeEach(() => {
   document.body.innerHTML = `
     <div id="messages"></div>
     <div id="list"></div>
-    <div id="remove">
-      <input id="remove-book-id" type="number">
-      <button id="remove-book-button" type="button">Borrar</button>
-    </div>
     <div id="form">
+      <h2 id="form-heading">Añadir libro</h2>
       <form id="book-form">
-        <select id="userId" name="userId" required></select>
+        <div id="book-id-field" hidden><input id="bookId" name="id" type="text" disabled></div>
         <select id="moduleCode" name="moduleCode" required></select>
         <input id="publisher" name="publisher" required>
         <input id="price" name="price" type="number" step="0.01" required>
         <input id="pages" name="pages" type="number" required>
         <input id="status-new" name="status" type="radio" value="new" required>
+        <input id="status-good" name="status" type="radio" value="good">
+        <input id="status-used" name="status" type="radio" value="used">
+        <input id="status-bad" name="status" type="radio" value="bad">
+        <input id="status-digital" name="status" type="radio" value="digital">
         <input id="photo" name="photo">
         <textarea id="comments" name="comments"></textarea>
         <input id="soldDate" name="soldDate" type="date">
@@ -78,6 +79,10 @@ describe('Vista', () => {
     expect(card.textContent).toContain('En venta')
     expect(card.textContent).toContain('Sense obrir')
     expect(card.textContent).toContain('75.00 €')
+    expect([...card.querySelectorAll('.card-actions button')].map((button) => button.dataset.action))
+      .toEqual(['cart', 'edit', 'delete'])
+    expect(card.querySelector('[data-action="cart"]').getAttribute('aria-label'))
+      .toContain('Añadir libro 6 al carrito')
 
     view.renderBooks([{ ...book, soldDate: '2023-12-21' }], modules)
     expect(document.querySelector('.card').textContent).toContain('Vendido el 21/12/2023')
@@ -88,6 +93,16 @@ describe('Vista', () => {
     view.renderBooks([book], modules)
 
     expect(document.querySelectorAll('.card')).toHaveLength(1)
+  })
+
+  test('al editar reemplaza la tarjeta en su posición', () => {
+    view.renderBooks([book, { ...book, id: 7 }], modules)
+    view.updateBook({ ...book, publisher: 'Anaya', price: 20 }, modules)
+
+    expect([...document.querySelectorAll('.card')].map((card) => card.dataset.bookId))
+      .toEqual(['6', '7'])
+    expect(document.querySelector('[data-book-id="6"]').textContent).toContain('Anaya')
+    expect(document.querySelector('[data-book-id="6"]').textContent).toContain('20.00 €')
   })
 
   test('los mensajes se cierran; los informativos caducan y los errores permanecen', () => {
@@ -109,11 +124,9 @@ describe('Vista', () => {
 
   test('el callback de submit recibe los datos con sus tipos', () => {
     const callback = vi.fn()
-    view.renderUsers([{ id: 3, nick: 'Juan' }])
     view.renderModules(modules)
     view.bindSubmitBook(callback)
 
-    document.querySelector('#userId').value = '3'
     document.querySelector('#moduleCode').value = '5021'
     document.querySelector('#publisher').value = 'Apunts'
     document.querySelector('#price').value = '12.50'
@@ -126,7 +139,6 @@ describe('Vista', () => {
     )
 
     expect(callback).toHaveBeenCalledExactlyOnceWith({
-      userId: 3,
       moduleCode: '5021',
       publisher: 'Apunts',
       price: 12.5,
@@ -140,26 +152,51 @@ describe('Vista', () => {
 
   test('reset limpia los campos sin eliminar el formulario', () => {
     const form = document.querySelector('#book-form')
-    form.querySelector('#publisher').value = 'Apunts'
-    form.querySelector('#status-new').checked = true
+    view.renderModules(modules)
+    view.bindResetBookForm()
+    view.showEditBookForm(book)
+
+    expect(document.querySelector('#form-heading').textContent).toBe('Editar libro')
+    expect(document.querySelector('#book-id-field').hidden).toBe(false)
+    expect(form.querySelector('#bookId').disabled).toBe(true)
+    expect(form.querySelector('#publisher').value).toBe('McGraw-Hill')
+    expect(form.querySelector('#status-new').checked).toBe(true)
+    expect(view.getBookFormData().id).toBe(6)
 
     form.querySelector('[type="reset"]').click()
 
     expect(document.querySelector('#book-form')).toBe(form)
     expect(form.querySelector('#publisher').value).toBe('')
     expect(form.querySelector('#status-new').checked).toBe(false)
+    expect(document.querySelector('#form-heading').textContent).toBe('Añadir libro')
+    expect(document.querySelector('#book-id-field').hidden).toBe(true)
+    expect(form.querySelector('#bookId').value).toBe('')
+    expect(view.getBookFormData()).not.toHaveProperty('id')
   })
 
-  test('el callback de borrado recibe la ID y una ID vacía muestra error', () => {
-    const callback = vi.fn()
-    view.bindRemoveBook(callback)
+  test('los botones de tarjetas existentes y nuevas envían la acción y la ID', () => {
+    const onAddToCart = vi.fn()
+    const onEdit = vi.fn()
+    const onRemove = vi.fn()
+    view.bindBookActions({ onAddToCart, onEdit, onRemove })
+    view.renderBook(book, modules)
+    view.renderBook({ ...book, id: 7 }, modules)
 
-    document.querySelector('#remove-book-button').click()
-    expect(callback).not.toHaveBeenCalled()
-    expect(document.querySelector('.alert-error').textContent).toContain('ID de libro válida')
+    document.querySelector('[data-book-id="6"] [data-action="cart"] .material-icons').click()
+    document.querySelector('[data-book-id="7"] [data-action="edit"]').click()
+    document.querySelector('[data-book-id="7"] [data-action="delete"]').click()
 
-    document.querySelector('#remove-book-id').value = '6'
-    document.querySelector('#remove-book-button').click()
-    expect(callback).toHaveBeenCalledExactlyOnceWith(6)
+    expect(onAddToCart).toHaveBeenCalledExactlyOnceWith(6)
+    expect(onEdit).toHaveBeenCalledExactlyOnceWith(7)
+    expect(onRemove).toHaveBeenCalledExactlyOnceWith(7)
+  })
+
+  test('la confirmación identifica el libro y el módulo', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+
+    expect(view.confirmRemoveBook(book, 'Incidentes de ciberseguridad')).toBe(false)
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining('6'))
+    expect(confirm.mock.calls[0][0]).toContain('Incidentes de ciberseguridad')
+    confirm.mockRestore()
   })
 })

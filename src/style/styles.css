@@ -201,6 +201,8 @@ h2 {
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid #f2d9e1;
   border-radius: 0.85rem;
@@ -222,7 +224,35 @@ h2 {
 }
 
 .card-body {
+  flex: 1;
   padding: 1.2rem;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0 1.2rem 1.2rem;
+}
+
+.card-actions button {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  padding: 0;
+}
+
+.card-actions .material-icons {
+  font-size: 1.3rem;
+}
+
+.card-actions [data-action='delete'] {
+  background: #9c345a;
+}
+
+.card-actions [data-action='delete']:hover {
+  background: #802344;
 }
 
 .card-body h3 {
@@ -261,17 +291,6 @@ h2 {
   color: #52677b;
 }
 
-.remove-fields {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.remove-fields input[type='number'] {
-  width: 150px;
-}
-
 .field {
   display: flex;
   flex-direction: column;
@@ -279,9 +298,12 @@ h2 {
 }
 
 .field label,
-.remove-fields label,
 .status-field legend {
   font-weight: 700;
+}
+
+.field[hidden] {
+  display: none;
 }
 
 input:not([type='radio']),
