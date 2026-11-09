@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <title>BatoiBooks David Torró</title>
     <meta
       name="description"
@@ -43,26 +44,14 @@
           <div id="list" class="books-grid"></div>
         </section>
 
-        <div id="remove" class="panel" aria-labelledby="remove-heading">
-          <h2 id="remove-heading">Borrar libro</h2>
-          <p>Introduce el ID del libro que quieras eliminar.</p>
-          <div class="remove-fields">
-            <label for="remove-book-id">ID del libro</label>
-            <input id="remove-book-id" name="bookId" type="number" min="1" step="1" inputmode="numeric">
-            <button id="remove-book-button" type="button">Borrar libro</button>
-          </div>
-        </div>
-
         <div id="form" class="panel" aria-labelledby="form-heading">
           <h2 id="form-heading">Añadir libro</h2>
           <p>Rellena los datos del libro o los apuntes que quieres vender.</p>
           <form id="book-form">
             <div class="form-grid">
-              <div class="field">
-                <label for="userId">Usuario</label>
-                <select id="userId" name="userId" required>
-                  <option value="">Selecciona un usuario</option>
-                </select>
+              <div id="book-id-field" class="field field-wide" hidden>
+                <label for="bookId">ID del libro</label>
+                <input id="bookId" name="id" type="text" disabled>
               </div>
               <div class="field">
                 <label for="moduleCode">Módulo</label>
