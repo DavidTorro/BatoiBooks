@@ -21,7 +21,15 @@ function findById(items, id) {
 }
 
 const server = setupServer(
-  http.get(`${API_URL}/books`, () => HttpResponse.json(db.books)),
+  http.get(`${API_URL}/books`, ({ request }) => {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    const moduleCode = searchParams.get('moduleCode')
+    return HttpResponse.json(db.books.filter((book) =>
+      (userId === null || String(book.userId) === userId) &&
+      (moduleCode === null || book.moduleCode === moduleCode)
+    ))
+  }),
   http.post(`${API_URL}/books`, async ({ request }) => {
     const book = {
       ...(await request.json()),
@@ -131,10 +139,13 @@ describe('Books', () => {
     expect(() => books.getBookById(book.id)).toThrow('Libro no encontrado')
   })
 
-  test('mantiene las consultas locales y elimina el incremento de precios', async () => {
+  test('consulta si existe un libro en el servidor y mantiene las demás consultas locales', async () => {
     const books = await createBooks()
 
-    expect(books.bookExists(4, '5025')).toBe(true)
+    await expect(books.bookExists(4, '5025')).resolves.toBe(true)
+    await expect(books.bookExists(2, '5021')).resolves.toBe(false)
+    db.books.push({ ...db.books[0], id: 99, moduleCode: '5021' })
+    await expect(books.bookExists(2, '5021')).resolves.toBe(true)
     expect(books.booksFromModule('5021')).toHaveLength(3)
     expect(books.booksWithStatus('new')).toHaveLength(1)
     expect(books.averagePriceOfBooks()).toBe('26.17 €')

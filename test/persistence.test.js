@@ -9,6 +9,7 @@ import {
   changeDBUserPassword,
   getDBBook,
   getDBBooks,
+  getDBBooksByUserAndModule,
   getDBModules,
   getDBUser,
   getDBUsers,
@@ -117,7 +118,15 @@ const server = setupServer(
     return HttpResponse.json({})
   }),
   http.get(`${API_URL}/modules`, () => HttpResponse.json(db.modules)),
-  http.get(`${API_URL}/books`, () => HttpResponse.json(db.books)),
+  http.get(`${API_URL}/books`, ({ request }) => {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    const moduleCode = searchParams.get('moduleCode')
+    return HttpResponse.json(db.books.filter((book) =>
+      (userId === null || String(book.userId) === userId) &&
+      (moduleCode === null || book.moduleCode === moduleCode)
+    ))
+  }),
   http.get(`${API_URL}/books/:id`, ({ params }) => {
     const book = findById(db.books, params.id)
     return book
@@ -159,6 +168,13 @@ describe('Servicios de persistencia', () => {
     await expect(getDBBooks()).resolves.toHaveLength(3)
     await expect(getDBUser(3)).resolves.toMatchObject({ nick: 'Juan' })
     await expect(getDBBook(6)).resolves.toMatchObject({ price: 75 })
+  })
+
+  test('filtra libros por usuario y módulo', async () => {
+    await expect(getDBBooksByUserAndModule(4, '5021')).resolves.toMatchObject([
+      { id: 7, userId: 4, moduleCode: '5021' },
+    ])
+    await expect(getDBBooksByUserAndModule(2, '5021')).resolves.toEqual([])
   })
 
   test('persisten altas, cambios y bajas de libros', async () => {

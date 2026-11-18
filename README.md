@@ -25,9 +25,14 @@ BatoiBooks es una aplicación para consultar y gestionar libros de texto y apunt
 - 🔧 Filtrado y consulta de libros por usuario, módulo y estado
 - 🖥️ Listado de libros y desplegable de módulos generados en el DOM
 - ➕ Formulario compartido para añadir y editar libros; botones en cada tarjeta para comprar, editar o eliminar
+- ✅ Validación de módulo, editorial, precio, páginas y estado con errores por campo en castellano antes de guardar
+- 🔎 Comprobación en el servidor de que el usuario no tenga otro libro del módulo elegido
+- 🧭 Navegación entre listado, formulario y página de información sin recargar la aplicación
 - 🛒 Carrito en memoria que guarda una copia del libro y avisa si ya está añadido
 - 💬 Confirmación antes de eliminar y mensajes de resultado de las acciones
 - ⚙️ Flujo de trabajo CI/CD automatizado con GitHub Actions
+
+Al cambiar el módulo, la aplicación consulta los libros del usuario y bloquea temporalmente el botón Guardar hasta recibir la respuesta. Si el módulo está repetido, muestra el error junto al selector. Al corregir un campo o reiniciar el formulario, actualiza o borra su mensaje. La comprobación desde el navegador ayuda a evitar duplicados, pero JSON Server no impone esta regla a las peticiones hechas directamente a la API.
 
 <!-- readme-gen:architecture:start -->
 
@@ -48,22 +53,25 @@ BatoiBooks es una aplicación para consultar y gestionar libros de texto y apunt
 
 flowchart LR
     app["src/main.js"] --> controller["src/controller"]
+    app --> router["src/services/router.js"]
     controller --> view["src/view"]
     controller --> model["src/model"]
     controller --> cart["Cart en memoria"]
     model --> api["src/services/api.js"]
     api -- HTTP --> database["JSON Server<br/>src/data/batoibooks.json"]
     view -- DOM --> page["index.html"]
+    router -- navegación --> page
 ```
 
 | Componente | Detalle |
 | ---------- | ------- |
-| Entrada | `src/main.js` crea la página a partir de la plantilla de `index.html` e inicia el controlador. |
-| Controlador | `src/controller/` carga los datos y coordina el alta, la edición, el carrito y el borrado. |
-| Vista | `src/view/` renderiza libros, opciones y mensajes; recoge el formulario y escucha las acciones de cada tarjeta. |
-| Modelo y API | `src/model/` consulta `src/services/api.js`, que se comunica con JSON Server. |
+| Entrada | `src/main.js` crea la página a partir de la plantilla de `index.html`, inicia el controlador y conecta el enrutador. |
+| Enrutador | `src/services/router.js` muestra la sección correspondiente y abre el formulario de edición sin reiniciarlo. |
+| Controlador | `src/controller/` coordina la carga, las acciones sobre libros y la comprobación asíncrona del módulo elegido. |
+| Vista | `src/view/` renderiza la interfaz, valida el formulario con la API de HTML5 y muestra los errores en cada campo. |
+| Modelo y API | `src/model/` consulta `src/services/api.js`; `Books.bookExists` pide a JSON Server los libros filtrados por usuario y módulo. |
 | Carrito | `src/model/cart.class.js` guarda copias de libros en memoria durante la sesión. |
-| Pruebas | Vitest comprueba modelo, carrito, vista y controlador; jsdom simula el DOM y MSW la API. |
+| Pruebas | Vitest comprueba modelo, carrito, vista, controlador, navegación y validación; jsdom simula el DOM y MSW la API. |
 
 <!-- readme-gen:architecture:end -->
 
@@ -84,6 +92,8 @@ batoibooks/
 │   ├── 5-dom.md
 │   ├── 5.1-test-dom.md
 │   ├── 6-eventos.md
+│   ├── 6.1-spa.md
+│   ├── 7-validacion.md
 │   └── assets/
 │       ├── errorRed.png
 │       ├── eventos.png
@@ -110,7 +120,8 @@ batoibooks/
 │   │   ├── user.class.js
 │   │   └── users.class.js
 │   ├── services/            # Comunicación con la API
-│   │   └── api.js
+│   │   ├── api.js
+│   │   └── router.js         # Navegación entre secciones
 │   ├── style/               # Estilos
 │   │   └── styles.css
 │   ├── view/                # Renderizado, formulario y eventos del DOM
@@ -125,6 +136,8 @@ batoibooks/
 │   ├── main.test.js         # Prueba inicial heredada
 │   ├── model.test.js        # Pruebas de las clases del modelo
 │   ├── persistence.test.js  # Pruebas de API y persistencia
+│   ├── router.test.js       # Pruebas de navegación
+│   ├── validation.test.js   # Validación y comprobación asíncrona de módulos
 │   └── view.test.js         # Pruebas de renderizado, formularios y botones
 ├── .gitignore               # Archivos ignorados por Git
 ├── docker-compose.yml       # Configuración de Docker Compose
@@ -134,7 +147,7 @@ batoibooks/
 └── README.md                # Documentación del proyecto
 ```
 
-Los enunciados de las prácticas DOM están en [5-dom.md](notes/5-dom.md), [5.1-test-dom.md](notes/5.1-test-dom.md) y [6-eventos.md](notes/6-eventos.md).
+Los enunciados de las prácticas DOM están en [5-dom.md](notes/5-dom.md), [5.1-test-dom.md](notes/5.1-test-dom.md), [6-eventos.md](notes/6-eventos.md), [6.1-spa.md](notes/6.1-spa.md) y [7-validacion.md](notes/7-validacion.md).
 
 ## 📦 Instalación
 
@@ -196,7 +209,7 @@ También puedes ejecutar los scripts directamente con `npm` si tienes Node.js in
 npm test -- --run
 ```
 
-Las pruebas de persistencia y del controlador usan MSW para simular la API; las de la vista y el controlador usan jsdom para simular el navegador. No es necesario arrancar `json-server` para ejecutarlas.
+Las pruebas de persistencia, controlador y validación usan MSW para simular la API; las de vista, controlador, enrutador y validación usan jsdom para simular el navegador. No es necesario arrancar `json-server` para ejecutarlas.
 
 ## 👤 Autor
 

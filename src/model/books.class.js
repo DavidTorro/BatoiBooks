@@ -3,6 +3,7 @@ import {
   addDBBook,
   changeDBBook,
   getDBBooks,
+  getDBBooksByUserAndModule,
   removeDBBook,
 } from '../services/api.js'
 
@@ -58,10 +59,9 @@ export default class Books {
     return bookIndex
   }
 
-  bookExists(userId, moduleCode) {
-    return this.data.some(
-      (book) => book.userId === userId && book.moduleCode === moduleCode
-    )
+  async bookExists(userId, moduleCode) {
+    const books = await getDBBooksByUserAndModule(userId, moduleCode)
+    return books.length > 0
   }
 
   booksFromUser(userId) {

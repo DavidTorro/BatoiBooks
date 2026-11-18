@@ -5,9 +5,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const template = document.querySelector('#page-template')
   document.querySelector('#app').append(template.content.cloneNode(true))
 
-  const myController = new Controller()
-  
-  const router = new Router({
+  let router
+  const myController = new Controller({
+    onEdit: () => router.navigate('form', { notify: false }),
+  })
+
+  router = new Router({
     pages: [
       { id: 'list', element: document.querySelector('.books-section') },
       { id: 'form', element: myController.view.form },

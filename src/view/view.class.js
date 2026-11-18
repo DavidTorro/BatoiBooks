@@ -1,3 +1,5 @@
+const REQUIRED_FIELDS = ['moduleCode', 'publisher', 'price', 'pages', 'status']
+
 export default class View {
   constructor() {
     this.booksList = document.querySelector('#list')
@@ -9,6 +11,10 @@ export default class View {
     this.bookIdInput = document.querySelector('#bookId')
     this.moduleSelect = document.querySelector('#moduleCode')
     this.messages = document.querySelector('#messages')
+    this.submitButton = this.bookForm.querySelector('[type="submit"]')
+    this.moduleCheckVersion = 0
+    this.moduleCheckPending = false
+    this.validatedFields = new Set()
   }
 
   renderModules(modules) {
@@ -152,11 +158,126 @@ export default class View {
     }
   }
 
+  getField(name) {
+    return this.bookForm.querySelector(`[name="${name}"]`)
+  }
+
+  updatePublisherValidity() {
+    const publisher = this.getField('publisher')
+    publisher.setCustomValidity(
+      publisher.value && !publisher.value.trim() ? 'La editorial es obligatoria' : ''
+    )
+  }
+
+  getFieldError(name) {
+    const field = this.getField(name)
+    const { validity } = field
+
+    if (validity.customError) return field.validationMessage
+    if (validity.badInput) return `Introduce un ${name === 'price' ? 'precio' : 'número de páginas'} válido`
+    if (validity.valueMissing) {
+      return {
+        moduleCode: 'Selecciona un módulo',
+        publisher: 'La editorial es obligatoria',
+        price: 'El precio es obligatorio',
+        pages: 'El número de páginas es obligatorio',
+        status: 'Selecciona un estado',
+      }[name]
+    }
+    if (validity.rangeUnderflow) {
+      return name === 'price'
+        ? 'El precio no puede ser negativo'
+        : 'El número de páginas debe ser al menos 1'
+    }
+    if (validity.stepMismatch) {
+      return name === 'price'
+        ? 'El precio puede tener como máximo dos decimales'
+        : 'El número de páginas debe ser entero'
+    }
+    return validity.valid ? '' : `Revisa el campo ${name}`
+  }
+
+  showFieldError(name) {
+    const field = this.getField(name)
+    const message = this.getFieldError(name)
+    const error = document.getElementById(`${name}-error`)
+    if (error) error.textContent = message
+    if (message) field.setAttribute('aria-invalid', 'true')
+    else field.removeAttribute('aria-invalid')
+  }
+
+  validateBookForm() {
+    this.updatePublisherValidity()
+    this.validatedFields = new Set(REQUIRED_FIELDS)
+    for (const name of REQUIRED_FIELDS) this.showFieldError(name)
+    return this.bookForm.checkValidity() && !this.moduleCheckPending
+  }
+
+  clearValidationState() {
+    this.moduleCheckVersion += 1
+    this.moduleCheckPending = false
+    this.submitButton.disabled = false
+    this.validatedFields.clear()
+    this.moduleSelect.setCustomValidity('')
+    this.getField('publisher').setCustomValidity('')
+    for (const name of REQUIRED_FIELDS) {
+      const error = document.getElementById(`${name}-error`)
+      if (error) error.textContent = ''
+      this.getField(name).removeAttribute('aria-invalid')
+    }
+  }
+
+  bindModuleChange(callback) {
+    this.moduleSelect.addEventListener('change', () => {
+      this.moduleCheckVersion += 1
+      const version = this.moduleCheckVersion
+      this.moduleSelect.setCustomValidity('')
+      this.showFieldError('moduleCode')
+      this.moduleCheckPending = Boolean(this.moduleSelect.value)
+      this.submitButton.disabled = this.moduleCheckPending
+
+      if (this.moduleCheckPending) {
+        callback({
+          moduleCode: this.moduleSelect.value,
+          bookId: this.bookIdInput.value ? Number(this.bookIdInput.value) : undefined,
+          version,
+        })
+      }
+    })
+  }
+
+  isCurrentModuleCheck(version) {
+    return version === this.moduleCheckVersion
+  }
+
+  setModuleDuplicate(isDuplicate, version) {
+    if (!this.isCurrentModuleCheck(version)) return
+    this.moduleSelect.setCustomValidity(isDuplicate ? 'Módulo repetido: ya tienes un libro de este módulo' : '')
+    this.showFieldError('moduleCode')
+  }
+
+  finishModuleCheck(version) {
+    if (!this.isCurrentModuleCheck(version)) return
+    this.moduleCheckPending = false
+    this.submitButton.disabled = false
+  }
+
   bindSubmitBook(callback) {
+    this.bookForm.addEventListener('input', (event) => {
+      const name = event.target.name
+      if (!REQUIRED_FIELDS.includes(name) || name === 'moduleCode') return
+      if (name === 'publisher') this.updatePublisherValidity()
+      if (this.validatedFields.has(name)) this.showFieldError(name)
+    })
+    this.bookForm.addEventListener('change', (event) => {
+      if (event.target.name === 'status' && this.validatedFields.has('status')) {
+        this.showFieldError('status')
+      }
+    })
     this.bookForm.addEventListener('submit', (event) => {
       event.preventDefault()
 
-      if (this.bookForm.checkValidity()) {
+      if (this.validateBookForm()) {
         callback(this.getBookFormData())
       }
     })
@@ -181,6 +302,7 @@ export default class View {
   }
 
   showEditBookForm(book) {
+    this.clearValidationState()
     this.formHeading.textContent = 'Editar libro'
     this.bookIdField.hidden = false
     this.bookIdInput.value = String(book.id)
@@ -197,6 +319,7 @@ export default class View {
   }
 
   showAddBookForm() {
+    this.clearValidationState()
     this.formHeading.textContent = 'Añadir libro'
     this.bookIdField.hidden = true
     this.bookIdInput.value = ''

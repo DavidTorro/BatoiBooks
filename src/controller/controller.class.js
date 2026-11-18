@@ -9,11 +9,13 @@ export default class Controller {
     books = new Books(),
     cart = new Cart(),
     modules = new Modules(),
+    onEdit = () => {},
   } = {}) {
     this.view = view
     this.books = books
     this.cart = cart
     this.modules = modules
+    this.onEdit = onEdit
   }
 
   async init() {
@@ -28,6 +30,7 @@ export default class Controller {
       this.view.renderBooks(this.books.data, this.modules.data)
       this.view.bindSubmitBook((bookData) => this.handleSubmitProductForm(bookData))
       this.view.bindResetBookForm()
+      this.view.bindModuleChange((selection) => this.handleModuleChange(selection))
       this.view.bindBookActions({
         onAddToCart: (bookId) => this.handleAddToCart(bookId),
         onEdit: (bookId) => this.handleEditBook(bookId),
@@ -37,6 +40,23 @@ export default class Controller {
     } catch (error) {
       this.view.showMessage('error', `Error cargando los datos: ${error.message}`)
       return false
+    }
+  }
+
+  async handleModuleChange({ moduleCode, bookId, version }) {
+    try {
+      const currentBook = bookId === undefined ? null : this.books.getBookById(bookId)
+      const isDuplicate = currentBook?.moduleCode === moduleCode
+        ? false
+        : await this.books.bookExists(currentBook?.userId ?? 2, moduleCode)
+      this.view.setModuleDuplicate(isDuplicate, version)
+    } catch (error) {
+      if (this.view.isCurrentModuleCheck(version)) {
+        this.view.setModuleDuplicate(false, version)
+        this.view.showMessage('error', `No se pudo comprobar el módulo: ${error.message}`)
+      }
+    } finally {
+      this.view.finishModuleCheck(version)
     }
   }
 
@@ -78,6 +98,7 @@ export default class Controller {
   handleEditBook(bookId) {
     try {
       this.view.showEditBookForm(this.books.getBookById(bookId))
+      this.onEdit()
       return true
     } catch (error) {
       this.view.showMessage('error', error.message)

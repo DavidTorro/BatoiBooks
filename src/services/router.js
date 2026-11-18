@@ -3,10 +3,13 @@ export default class Router {
     this.pages = pages
     this.onNavigate = onNavigate
     this.handleHashChange = this.handleHashChange.bind(this)
+    this.handleLinkClick = this.handleLinkClick.bind(this)
   }
 
   init() {
     window.addEventListener('hashchange', this.handleHashChange)
+    window.addEventListener('popstate', this.handleHashChange)
+    document.addEventListener('click', this.handleLinkClick)
     this.showPage(window.location.hash)
   }
 
@@ -14,7 +17,18 @@ export default class Router {
     this.showPage(window.location.hash)
   }
 
-  showPage(hash) {
+  handleLinkClick(event) {
+    const link = event.target.closest('a[href^="#"]')
+    if (link?.hash === window.location.hash) this.showPage(link.hash)
+  }
+
+  navigate(pageId, { notify = true } = {}) {
+    const hash = `#${pageId}`
+    if (window.location.hash !== hash) window.history.pushState(null, '', hash)
+    this.showPage(hash, { notify })
+  }
+
+  showPage(hash, { notify = true } = {}) {
     const pageId = hash.startsWith('#') ? hash.slice(1) : hash
     const page = this.pages.find(({ id }) => id === pageId) ?? this.pages[0]
 
@@ -22,6 +36,6 @@ export default class Router {
       currentPage.element.classList.toggle('hidden', currentPage !== page)
     }
 
-    this.onNavigate(page.id)
+    if (notify) this.onNavigate(page.id)
   }
 }
