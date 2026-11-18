@@ -62,6 +62,11 @@ export function getDBBooks() {
   return request('/books')
 }
 
+export function getDBBooksByUserAndModule(userId, moduleCode) {
+  const params = new URLSearchParams({ userId: String(userId), moduleCode })
+  return request(`/books?${params}`)
+}
+
 export function getDBBook(bookId) {
   return request(`/books/${bookId}`)
 }

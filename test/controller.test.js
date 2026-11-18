@@ -7,7 +7,10 @@ import Controller from '../src/controller/controller.class.js'
 const API_URL = 'http://localhost:3000'
 const initialDB = {
   users: [{ id: 2, nick: 'Ignasi', email: 'ignasi@example.com', password: '1234' }],
-  modules: [{ code: '5021', cliteral: 'Incidentes de ciberseguridad', vliteral: 'Incidents', courseId: '59' }],
+  modules: [
+    { code: '5021', cliteral: 'Incidentes de ciberseguridad', vliteral: 'Incidents', courseId: '59' },
+    { code: '5025', cliteral: 'Hacking ético', vliteral: 'Hacking ètic', courseId: '59' },
+  ],
   books: [
     { id: 1, userId: 2, moduleCode: '5021', publisher: 'Apunts', price: 12, pages: 25, status: 'good', photo: '', comments: '', soldDate: '' },
     { id: 2, userId: 2, moduleCode: '5021', publisher: 'McGraw-Hill', price: 30, pages: 100, status: 'new', photo: '', comments: '', soldDate: '' },
@@ -19,7 +22,15 @@ let db
 const server = setupServer(
   http.get(`${API_URL}/users`, () => HttpResponse.json(db.users)),
   http.get(`${API_URL}/modules`, () => HttpResponse.json(db.modules)),
-  http.get(`${API_URL}/books`, () => HttpResponse.json(db.books)),
+  http.get(`${API_URL}/books`, ({ request }) => {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    const moduleCode = searchParams.get('moduleCode')
+    return HttpResponse.json(db.books.filter((book) =>
+      (userId === null || String(book.userId) === userId) &&
+      (moduleCode === null || book.moduleCode === moduleCode)
+    ))
+  }),
   http.post(`${API_URL}/books`, async ({ request }) => {
     const book = { ...(await request.json()), id: 3 }
     db.books.push(book)
@@ -82,7 +93,7 @@ describe('Controlador', () => {
     expect(await controller.init()).toBe(true)
     expect(populateCart).toHaveBeenCalledOnce()
     expect(controller.cart.data).toEqual([])
-    expect(controller.modules.data).toHaveLength(1)
+    expect(controller.modules.data).toHaveLength(2)
     expect(controller.books.data).toHaveLength(2)
     expect(renderModules).toHaveBeenCalledWith(controller.modules.data)
     expect(renderBooks).toHaveBeenCalledWith(controller.books.data, controller.modules.data)
@@ -94,7 +105,9 @@ describe('Controlador', () => {
     await controller.init()
     const form = document.querySelector('#book-form')
 
-    form.querySelector('#moduleCode').value = '5021'
+    form.querySelector('#moduleCode').value = '5025'
+    form.querySelector('#moduleCode').dispatchEvent(new Event('change', { bubbles: true }))
+    await vi.waitFor(() => expect(form.querySelector('[type="submit"]').disabled).toBe(false))
     form.querySelector('#publisher').value = 'Apunts'
     form.querySelector('#price').value = '15'
     form.querySelector('#pages').value = '40'
@@ -125,11 +138,13 @@ describe('Controlador', () => {
 
   test('editar usa PUT, conserva el propietario y restablece el formulario', async () => {
     db.books[1].userId = 3
-    const controller = new Controller()
+    const onEdit = vi.fn()
+    const controller = new Controller({ onEdit })
     await controller.init()
     document.querySelector('[data-book-id="2"] [data-action="edit"]').click()
     const form = document.querySelector('#book-form')
 
+    expect(onEdit).toHaveBeenCalledOnce()
     expect(document.querySelector('#form-heading').textContent).toBe('Editar libro')
     expect(form.querySelector('#bookId').value).toBe('2')
     expect(form.querySelector('#bookId').disabled).toBe(true)

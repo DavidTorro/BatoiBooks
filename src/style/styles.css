@@ -306,6 +306,20 @@ h2 {
   font-weight: 700;
 }
 
+.field-error {
+  display: block;
+  color: #a4262c;
+  font-size: 0.875rem;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+.field [aria-invalid='true'] {
+  border-color: #a4262c;
+}
+
 .field[hidden] {
   display: none;
 }
